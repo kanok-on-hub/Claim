@@ -191,12 +191,22 @@
   function renderRejectForm_(bundle) {
     const claim = bundle.claim || {};
     const requester = bundle.requesterPerson || {};
-    const approver = bundle.approverPerson || {};
 
     const reqNo = shortReqId_(claim.requestId);
     const status = String(claim.status || "").toUpperCase();
 
-    setHeader_("Reject Claim ❌", `Hi, <span class="font-bold text-[#1F2937]">${escapeHtml_(userProfile?.displayName || "")}</span>`);
+    // รูปแบบการดึงชื่อ LINE Display Name
+    const lineName = String(claim.name || requester.displayName || "-");
+
+    // รูปแบบการดึง Full Name (Nickname)
+    const fn = String(requester.fullName || "").trim();
+    const nn = String(requester.nickname || "").trim();
+    let fullNameNick = "-";
+    if (fn && nn) fullNameNick = `${fn} (${nn})`;
+    else if (fn) fullNameNick = fn;
+    else if (nn) fullNameNick = nn;
+
+    setHeader_("Reject ❌", `Hi, <span class="font-bold text-[#1F2937]">${escapeHtml_(userProfile?.displayName || "")}</span>`);
 
     $("rootBox").innerHTML = `
       <div class="card space-y-3">
@@ -207,7 +217,8 @@
         
         <div class="space-y-3 px-1 mt-2">
           ${kvRow_("Req No.", `<span class="font-mono">${escapeHtml_(reqNo)}</span>`)}
-          ${kvRow_("Name", escapeHtml_(claim.name || requester.fullName || requester.displayName || "-"))}
+          ${kvRow_("LINE", escapeHtml_(lineName))}
+          ${kvRow_("Name", escapeHtml_(fullNameNick))}
           ${kvRow_("Company", escapeHtml_(claim.company || requester.company || "-"))}
           ${kvRow_("Amount", escapeHtml_(formatAmountTHB_(claim.amount)))}
           ${kvRow_("Attach", buildViewLinkHtml_(claim.requestAttachmentUrl, "คลิกเพื่อดูไฟล์"))}
@@ -403,3 +414,6 @@
 </script>
 </body>
 </html>
+
+
+
