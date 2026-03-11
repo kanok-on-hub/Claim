@@ -13,7 +13,7 @@
     body { font-family: 'Plus Jakarta Sans', sans-serif; background:#F3F4F6; color:#1F2937; -webkit-tap-highlight-color: transparent; }
     .card { background:#fff; border-radius: 1.25rem; border:1px solid #E5E7EB; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); padding: 1.1rem; }
 
-    .input { background:#F9FAFB; border:1px solid #D1D5DB; border-radius:.9rem; padding:.85rem; width:100%; outline:none; transition:.2s; font-size:.95rem; color:#374151; font-weight: bold; }
+    .input { background:#F9FAFB; border:1px solid #D1D5DB; border-radius:.9rem; padding:.85rem; width:100%; outline:none; transition:.2s; font-size:.95rem; color:#374151; }
     .input:focus { background:#fff; border-color:#3B82F6; box-shadow:0 0 0 3px rgba(59,130,246,.15); }
     .err { border-color:#EF4444 !important; background-color:#FEF2F2 !important; box-shadow:0 0 0 3px rgba(239,68,68,.15) !important; }
 
@@ -24,25 +24,24 @@
   </style>
 </head>
 
-<body class="pb-24 antialiased">
+<body class="pb-32 antialiased">
   <div class="max-w-md mx-auto min-h-screen flex flex-col relative">
 
-    <div class="bg-white px-6 pt-10 pb-4 rounded-b-3xl shadow-sm mb-5 relative z-10 border-b border-slate-100">
+    <div class="bg-white px-6 pt-10 pb-4 rounded-b-3xl shadow-sm mb-4 relative z-10 border-b border-slate-100">
       <div class="flex items-center gap-4">
         <div id="avatarBox" class="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-md ring-2 ring-blue-50 hidden">
           <img id="profileImg" src="" class="w-full h-full object-cover" alt="profile">
         </div>
-        <div class="flex-1">
+        <div>
           <h1 id="title" class="text-2xl font-bold text-[#1F2937] tracking-tight">Edit Amount ✏️</h1>
-          <p id="subTitle" class="text-[#9CA3AF] text-sm font-medium mt-0.5 flex items-center gap-1">
+          <p id="userGreet" class="text-[#9CA3AF] text-sm font-medium mt-0.5 flex items-center gap-1">
             <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Loading...
           </p>
         </div>
-        <span id="statusBadge" class="hidden info-badge">Draft</span>
       </div>
     </div>
 
-    <div class="px-5 pb-24" id="rootBox"></div>
+    <div class="px-5 space-y-5 flex-1" id="rootBox"></div>
 
     <div class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-[#F3F4F6] p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] z-40 hidden" id="bottomBar">
       <button id="submitBtn" onclick="handleSubmit()"
@@ -60,8 +59,10 @@
   </div>
 
 <script>
+  // ================= CONFIG =================
   const LIFF_ID = "2008997153-opOWuU0Y";
   const API_URL = "https://script.google.com/macros/s/AKfycbzjatOY93-6QIVPdBSxJyzQhMw9DfqwlgFVdvEanLpZgNZ_1ACwyrUKMGvgnCArwSzWHQ/exec";
+  // ==========================================
 
   const $ = (id) => document.getElementById(id);
 
@@ -100,18 +101,8 @@
   }
 
   function setHeader_(title, subtitle) {
-    $("title").textContent = title || "Edit Amount ✏️";
-    $("subTitle").innerHTML = subtitle || "";
-  }
-
-  function setStatusBadge_(text) {
-    const el = $("statusBadge");
-    if (!text) {
-      el.classList.add("hidden");
-      return;
-    }
-    el.textContent = text;
-    el.classList.remove("hidden");
+    if(title) $("title").textContent = title;
+    if(subtitle) $("userGreet").innerHTML = subtitle;
   }
 
   function setBtnDisabled_(disabled) {
@@ -124,14 +115,13 @@
     return `
       <div class="flex items-baseline space-x-3">
         <span class="text-[#9CA3AF] text-xs w-20 flex-shrink-0">${escapeHtml_(label)}</span>
-        <span class="font-bold text-[#1F2937] text-sm break-words flex-1 text-right">${valueHtml}</span>
+        <span class="font-bold text-[#1F2937] text-sm break-words flex-1">${valueHtml}</span>
       </div>`;
   }
 
   // --- Screens ---
   function renderSystemError_(msg) {
     setHeader_("System Error", "Please try again");
-    setStatusBadge_("");
     $("bottomBar").classList.add("hidden");
     $("rootBox").innerHTML = `
       <div class="card text-center py-10 mt-6">
@@ -145,7 +135,6 @@
 
   function renderNotFound_() {
     setHeader_("Not Found", "Error");
-    setStatusBadge_("");
     $("bottomBar").classList.add("hidden");
     $("rootBox").innerHTML = `
       <div class="card text-center py-10 mt-6">
@@ -158,7 +147,6 @@
 
   function renderForbidden_(msg) {
     setHeader_("Not Allowed", "Action not permitted");
-    setStatusBadge_("");
     $("bottomBar").classList.add("hidden");
     $("rootBox").innerHTML = `
       <div class="card text-center py-10 mt-6">
@@ -208,38 +196,37 @@
     $("amountErr").classList.remove("hidden");
   }
 
-  // --- Main Render ---
+  // --- Main Form Render ---
   function renderForm_(claim) {
     const reqNo = shortReqId_(claim.requestId);
     const status = String(claim.status || "").toUpperCase();
 
     setHeader_("Edit Amount ✏️", `Hi, <span class="font-bold text-[#1F2937]">${escapeHtml_(userProfile?.displayName || "")}</span>`);
-    setStatusBadge_(status || "Draft");
 
     $("rootBox").innerHTML = `
-      <div class="card mb-5 text-center pt-6 pb-5 mt-2">
+      <div class="card mb-5 text-center pt-6 pb-5">
          <div class="w-16 h-16 rounded-full bg-[#EFF6FF] flex items-center justify-center text-[#3B82F6] text-3xl mx-auto mb-3 shadow-inner">💸</div>
          <div class="font-bold text-[#1F2937] text-lg">Claim Amount</div>
          <div class="text-xs text-[#9CA3AF] mt-1 font-mono">Req No. ${escapeHtml_(reqNo)}</div>
       </div>
 
-      <div class="card space-y-4 mb-5">
-        <div class="space-y-3 px-1 mt-1">
+      <div class="card mb-5">
+        <div class="space-y-3 px-1">
           ${kvRow_("Company", escapeHtml_(claim.company || "-"))}
           ${kvRow_("Status", `<span class="text-[#2563EB]">${escapeHtml_(status || "-")}</span>`)}
           ${kvRow_("Current", escapeHtml_(formatAmountTHB_(claim.amount)))}
         </div>
-        
-        <hr class="border-[#F3F4F6] my-4" />
-        
+      </div>
+
+      <div class="card space-y-4 mb-5">
         <div class="px-1">
           <label class="text-sm font-bold text-[#1F2937] block mb-2">New Amount <span class="text-[#EF4444]">*</span></label>
-          <input id="amountInput" type="text" inputmode="decimal" class="input text-center text-lg text-[#2563EB]" placeholder="เช่น 1200 หรือ 1,200.50" value="${escapeHtml_(formatAmountForInput_(claim.amount))}">
+          <input id="amountInput" type="text" inputmode="decimal" class="input font-bold text-center text-[#2563EB] text-lg" placeholder="เช่น 1200 หรือ 1,200.50" value="${escapeHtml_(formatAmountForInput_(claim.amount))}">
           <div id="amountErr" class="hidden text-xs text-[#EF4444] mt-2 font-bold text-center"></div>
         </div>
 
-        <div class="flex items-start gap-2 bg-[#F8FAFC] p-3 rounded-xl border border-[#F1F5F9] mt-4">
-          <span class="text-[#94A3B8] mt-0.5">ℹ️</span>
+        <div class="flex items-start gap-2 bg-[#F8FAFC] p-3 rounded-xl border border-[#F1F5F9] mx-1">
+          <span class="text-[#3B82F6] mt-0.5">ℹ️</span>
           <div class="text-[11px] text-[#64748B] font-medium leading-relaxed">
             สามารถแก้ไขยอดเงินเบิกได้เฉพาะตอนรายการยังเป็น Draft เท่านั้น
           </div>
@@ -313,6 +300,7 @@
         return;
       }
 
+      // Success!
       try { await liff.sendMessages([{ type: "text", text: "CLAIM_DRAFT_UPDATED:" + requestId }]); } catch (e) {}
 
       hideLoader();
@@ -360,7 +348,6 @@
     }
 
     setHeader_("Edit Amount ✏️", `Hi, <span class="font-bold text-[#1F2937]">${escapeHtml_(userProfile.displayName || "")}</span>`);
-    setStatusBadge_("Loading");
 
     let data;
     try {
