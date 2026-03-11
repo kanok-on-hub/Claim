@@ -17,28 +17,38 @@
     .input:focus { background:#fff; border-color:#3B82F6; box-shadow:0 0 0 3px rgba(59,130,246,.15); }
     .err { border-color:#EF4444 !important; background-color:#FEF2F2 !important; box-shadow:0 0 0 3px rgba(239,68,68,.15) !important; }
 
+    .info-badge { font-size:11px; font-weight:700; background:#EFF6FF; color:#2563EB; padding:4px 12px; border-radius:9999px; border:1px solid #DBEAFE; display:inline-flex; align-items:center; white-space:nowrap; }
+
+    .btn-disabled { opacity: .55; cursor: not-allowed; }
     ::-webkit-scrollbar { display: none; }
   </style>
 </head>
 
-<body class="pb-20 antialiased">
+<body class="pb-32 antialiased">
   <div class="max-w-md mx-auto min-h-screen flex flex-col relative">
 
-    <div class="bg-white px-6 pt-10 pb-4 rounded-b-3xl shadow-sm mb-5 relative z-10 border-b border-slate-100">
+    <div class="bg-white px-6 pt-10 pb-4 rounded-b-3xl shadow-sm mb-4 relative z-10 border-b border-slate-100">
       <div class="flex items-center gap-4">
         <div id="avatarBox" class="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-md ring-2 ring-blue-50 hidden">
           <img id="profileImg" src="" class="w-full h-full object-cover" alt="profile">
         </div>
-        <div class="flex-1">
-          <h1 id="title" class="text-2xl font-bold text-[#1F2937] tracking-tight">Loading...</h1>
-          <p id="subTitle" class="text-[#9CA3AF] text-sm font-medium mt-0.5 flex items-center gap-1">
-            <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Please wait a moment
+        <div>
+          <h1 id="title" class="text-2xl font-bold text-[#1F2937] tracking-tight">Edit Amount ✏️</h1>
+          <p id="userGreet" class="text-[#9CA3AF] text-sm font-medium mt-0.5 flex items-center gap-1">
+            <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Loading...
           </p>
         </div>
       </div>
     </div>
 
-    <div class="px-5 pb-10 flex-1" id="rootBox"></div>
+    <div class="px-5 space-y-6 flex-1" id="rootBox"></div>
+
+    <div class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-[#F3F4F6] p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] z-40 hidden" id="bottomBar">
+      <button id="submitBtn" onclick="handleSubmit()"
+        class="w-full bg-[#60A5FA] hover:bg-[#3B82F6] text-white py-4 rounded-2xl font-bold text-lg shadow-lg shadow-blue-200 active:scale-[0.98] transition-all">
+        บันทึกจำนวนเงิน
+      </button>
+    </div>
 
     <div id="loader" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden items-center justify-center z-50">
       <div class="bg-white p-6 rounded-2xl shadow-xl flex flex-col items-center max-w-[180px] w-full">
@@ -53,12 +63,21 @@
   const API_URL = "https://script.google.com/macros/s/AKfycbzjatOY93-6QIVPdBSxJyzQhMw9DfqwlgFVdvEanLpZgNZ_1ACwyrUKMGvgnCArwSzWHQ/exec";
 
   const $ = (id) => document.getElementById(id);
+
   let userProfile = null;
   let claimData = null;
   let requestId = "";
 
-  function showLoader(msg){ $("loaderText").textContent = msg || "Processing..."; $("loader").classList.remove("hidden"); $("loader").classList.add("flex"); }
-  function hideLoader(){ $("loader").classList.add("hidden"); $("loader").classList.remove("flex"); }
+  function showLoader(msg){
+    $("loaderText").textContent = msg || "Processing...";
+    $("loader").classList.remove("hidden");
+    $("loader").classList.add("flex");
+  }
+
+  function hideLoader(){
+    $("loader").classList.add("hidden");
+    $("loader").classList.remove("flex");
+  }
 
   function doneAndExit(){
     try {
@@ -72,8 +91,22 @@
 
   function escapeHtml_(s) {
     return String(s ?? "")
-      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+      .replace(/&/g,"&amp;")
+      .replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;")
+      .replace(/'/g,"&#39;");
+  }
+
+  function setHeader_(title, subtitle) {
+    if(title) $("title").textContent = title;
+    if(subtitle) $("userGreet").innerHTML = subtitle;
+  }
+
+  function setBtnDisabled_(disabled) {
+    const btn = $("submitBtn");
+    btn.disabled = !!disabled;
+    btn.classList.toggle("btn-disabled", !!disabled);
   }
 
   function kvRow_(label, valueHtml) {
@@ -84,6 +117,45 @@
       </div>`;
   }
 
+  // --- Screens ---
+  function renderSystemError_(msg) {
+    setHeader_("System Error", "Please try again");
+    $("bottomBar").classList.add("hidden");
+    $("rootBox").innerHTML = `
+      <div class="card text-center py-10 mt-6">
+        <div class="text-4xl mb-3">⚠️</div>
+        <div class="text-lg font-bold text-[#1F2937]">System Error</div>
+        <div class="text-sm text-[#9CA3AF] mt-2">${escapeHtml_(msg || "ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองใหม่อีกครั้ง")}</div>
+        <button class="w-full mt-6 bg-[#60A5FA] hover:bg-[#3B82F6] shadow-lg shadow-blue-200 text-white py-3.5 rounded-2xl font-bold active:scale-[0.98] transition-all" onclick="location.reload()">Try Again</button>
+        <button class="w-full mt-3 bg-white border border-[#E5E7EB] text-[#9CA3AF] py-3 rounded-2xl font-bold hover:bg-[#F9FAFB] transition-colors active:scale-[0.98]" onclick="doneAndExit()">Close</button>
+      </div>`;
+  }
+
+  function renderNotFound_() {
+    setHeader_("Not Found", "Error");
+    $("bottomBar").classList.add("hidden");
+    $("rootBox").innerHTML = `
+      <div class="card text-center py-10 mt-6">
+        <div class="text-4xl mb-3">📄❓</div>
+        <div class="text-lg font-bold text-[#1F2937]">ไม่พบรายการเบิกเงินค่ะ</div>
+        <div class="text-sm text-[#9CA3AF] mt-2">โปรดตรวจสอบลิงก์อีกครั้ง</div>
+        <button class="w-full mt-6 bg-[#60A5FA] hover:bg-[#3B82F6] shadow-lg shadow-blue-200 text-white py-3.5 rounded-2xl font-bold active:scale-[0.98] transition-all" onclick="doneAndExit()">ปิดหน้าต่าง</button>
+      </div>`;
+  }
+
+  function renderForbidden_(msg) {
+    setHeader_("Not Allowed", "Action not permitted");
+    $("bottomBar").classList.add("hidden");
+    $("rootBox").innerHTML = `
+      <div class="card text-center py-10 mt-6">
+        <div class="text-4xl mb-3">⛔</div>
+        <div class="text-lg font-bold text-[#1F2937]">ไม่สามารถแก้ไขจำนวนเงินได้</div>
+        <div class="text-sm text-[#9CA3AF] mt-2">${escapeHtml_(msg || "รายการนี้ไม่อยู่ในสถานะ Draft หรือไม่ใช่ของคุณ")}</div>
+        <button class="w-full mt-6 bg-[#60A5FA] hover:bg-[#3B82F6] shadow-lg shadow-blue-200 text-white py-3.5 rounded-2xl font-bold active:scale-[0.98] transition-all" onclick="doneAndExit()">ปิดหน้าต่าง</button>
+      </div>`;
+  }
+
+  // --- Helpers ---
   function formatAmountForInput_(v) {
     const n = Number(v || 0);
     if (isNaN(n)) return "";
@@ -112,87 +184,56 @@
   }
 
   function clearErr_() {
-    $("amountInput")?.classList.remove("err");
-    $("amountErr")?.classList.add("hidden");
+    $("amountInput").classList.remove("err");
+    $("amountErr").classList.add("hidden");
   }
 
-  // --- Screens ---
-  function renderSystemError_(msg) {
-    $("title").textContent = "System Error";
-    $("subTitle").textContent = "Please try again";
-    $("rootBox").innerHTML = `
-      <div class="card text-center py-10 mt-6">
-        <div class="text-4xl mb-3">⚠️</div>
-        <div class="text-lg font-bold text-[#1F2937]">System Error</div>
-        <div class="text-sm text-[#9CA3AF] mt-2">${escapeHtml_(msg || "ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองใหม่อีกครั้ง")}</div>
-        <button class="w-full mt-6 bg-[#60A5FA] hover:bg-[#3B82F6] shadow-lg shadow-blue-200 text-white py-3.5 rounded-2xl font-bold active:scale-[0.98] transition-all" onclick="location.reload()">Try Again</button>
-        <button class="w-full mt-3 bg-white border border-[#E5E7EB] text-[#9CA3AF] py-3 rounded-2xl font-bold hover:bg-[#F9FAFB] transition-colors active:scale-[0.98]" onclick="doneAndExit()">Close</button>
-      </div>`;
+  function showErr_(msg) {
+    $("amountInput").classList.add("err");
+    $("amountErr").textContent = msg;
+    $("amountErr").classList.remove("hidden");
   }
 
-  function renderNotFound_() {
-    $("title").textContent = "Not Found";
-    $("subTitle").textContent = "Error";
-    $("rootBox").innerHTML = `
-      <div class="card text-center py-10 mt-6">
-        <div class="text-4xl mb-3">📄❓</div>
-        <div class="text-lg font-bold text-[#1F2937]">ไม่พบรายการเบิกเงินค่ะ</div>
-        <div class="text-sm text-[#9CA3AF] mt-2">โปรดตรวจสอบลิงก์อีกครั้ง</div>
-        <button class="w-full mt-6 bg-[#60A5FA] hover:bg-[#3B82F6] shadow-lg shadow-blue-200 text-white py-3.5 rounded-2xl font-bold active:scale-[0.98] transition-all" onclick="doneAndExit()">ปิดหน้าต่าง</button>
-      </div>`;
-  }
-
-  function renderForbidden_(msg) {
-    $("title").textContent = "Not Allowed";
-    $("subTitle").textContent = "Action not permitted";
-    $("rootBox").innerHTML = `
-      <div class="card text-center py-10 mt-6">
-        <div class="text-4xl mb-3">⛔</div>
-        <div class="text-lg font-bold text-[#1F2937]">ไม่สามารถแก้ไขยอดเงินได้</div>
-        <div class="text-sm text-[#9CA3AF] mt-2">${escapeHtml_(msg || "รายการนี้ไม่อยู่ในสถานะ Draft หรือไม่ใช่ของคุณ")}</div>
-        <button class="w-full mt-6 bg-[#60A5FA] hover:bg-[#3B82F6] shadow-lg shadow-blue-200 text-white py-3.5 rounded-2xl font-bold active:scale-[0.98] transition-all" onclick="doneAndExit()">ปิดหน้าต่าง</button>
-      </div>`;
-  }
-
-  // --- Main Form (สไตล์เดียวกับ remark.html) ---
+  // --- Main Form Render ---
   function renderForm_(claim) {
     const reqNo = shortReqId_(claim.requestId);
     const status = String(claim.status || "").toUpperCase();
 
-    $("title").textContent = "Edit Amount ✏️";
+    setHeader_("Edit Amount ✏️", `Hi, <span class="font-bold text-[#1F2937]">${escapeHtml_(userProfile?.displayName || "")}</span>`);
 
     $("rootBox").innerHTML = `
-      <div class="card mb-5">
-        <div class="text-center mb-4">
-          <div class="text-4xl mb-2">💸</div>
-          <div class="font-bold text-lg text-[#1F2937]">Expense Claim</div>
-          <div class="text-xs font-bold text-[#3B82F6] mt-1">${escapeHtml_(status || "DRAFT")}</div>
+      <div class="card space-y-3">
+        <div class="flex justify-between items-center px-1 h-7">
+          <label class="text-sm font-bold text-[#1F2937]">Expense Claim Info</label>
+          <span class="info-badge">${escapeHtml_(status || "DRAFT")}</span>
         </div>
-        <hr class="border-[#F3F4F6] mb-4" />
-        <div class="space-y-3 px-1">
+        
+        <div class="space-y-3 px-1 mt-2">
           ${kvRow_("Req No.", `<span class="font-mono">${escapeHtml_(reqNo)}</span>`)}
           ${kvRow_("Company", escapeHtml_(claim.company || "-"))}
-          ${kvRow_("Current", escapeHtml_(formatAmountTHB_(claim.amount)))}
+          ${kvRow_("Amount", escapeHtml_(formatAmountTHB_(claim.amount)))}
         </div>
       </div>
 
-      <div class="space-y-2 mb-6 ml-1">
-        <label class="block text-sm font-bold text-[#1F2937]">New Amount <span class="text-[#EF4444]">*</span></label>
-        <input id="amountInput" type="text" inputmode="decimal" class="input font-bold text-[#2563EB] text-lg" placeholder="เช่น 1200 หรือ 1,200.50" value="${escapeHtml_(formatAmountForInput_(claim.amount))}">
-
-        <div id="amountErr" class="hidden text-xs text-[#EF4444] mt-1.5 flex items-center font-bold">
-          <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
-          กรุณาระบุยอดเงินให้ถูกต้อง
+      <div class="card space-y-4">
+        <div>
+          <label class="text-sm font-bold text-[#1F2937] block mb-2 ml-1">New Amount <span class="text-[#EF4444]">*</span></label>
+          <input id="amountInput" type="text" inputmode="decimal" class="input font-bold text-[#1F2937]" placeholder="เช่น 1200 หรือ 1,200.50" value="${escapeHtml_(formatAmountForInput_(claim.amount))}">
+          <div id="amountErr" class="hidden text-xs text-[#EF4444] mt-2 font-bold ml-1"></div>
         </div>
-      </div>
 
-      <div class="space-y-3">
-        <button id="submitBtn" class="w-full bg-[#60A5FA] hover:bg-[#3B82F6] text-white py-4 rounded-2xl font-bold text-md transition-all shadow-lg shadow-blue-200 active:scale-[0.98]"
-          onclick="handleSubmit()">บันทึกยอดเงิน</button>
+        <div class="flex items-start gap-2 bg-[#F8FAFC] p-3 rounded-xl border border-[#F1F5F9]">
+          <span class="text-[#94A3B8] mt-0.5">ℹ️</span>
+          <div class="text-[11px] text-[#64748B] font-medium leading-relaxed">
+            สามารถแก้ไขจำนวนเงินได้เฉพาะรายการที่อยูในสถานะ Draft เท่านั้น
+          </div>
+        </div>
       </div>
     `;
 
     $("amountInput").addEventListener("input", clearErr_);
+    $("bottomBar").classList.remove("hidden");
+    setBtnDisabled_(false);
   }
 
   // --- API Calls ---
@@ -214,23 +255,17 @@
 
   async function handleSubmit() {
     clearErr_();
-    
-    const amountInp = $("amountInput");
-    const amountErr = $("amountErr");
-    const btn = $("submitBtn");
 
-    const raw = (amountInp?.value || "").trim();
+    const raw = ($("amountInput")?.value || "").trim();
     const parsed = parseAmountClient_(raw);
-    
     if (!parsed.ok) {
-      if(amountInp) amountInp.classList.add("err");
-      if(amountErr) amountErr.classList.remove("hidden");
+      showErr_("กรุณาระบุจำนวนเงินให้ถูกต้อง (เช่น 1200.50)");
       return;
     }
 
     try {
       showLoader("Saving...");
-      if (btn) btn.disabled = true;
+      setBtnDisabled_(true);
 
       const data = await postFormUrlEncoded_({
         action: "update_claim_amount",
@@ -241,19 +276,18 @@
 
       if (!data || !data.ok) {
         hideLoader();
-        if (btn) btn.disabled = false;
+        setBtnDisabled_(false);
 
         const errCode = String(data?.error || "unknown_error");
+
         if (errCode === "missing_amount" || errCode === "invalid_amount") {
-          if(amountInp) amountInp.classList.add("err");
-          if(amountErr) amountErr.classList.remove("hidden");
-          return;
+          showErr_("กรุณาระบุจำนวนเงินให้ถูกต้อง"); return;
         }
         if (errCode === "not_owner") {
           renderForbidden_("รายการนี้ไม่ใช่ของคุณ"); return;
         }
         if (errCode === "cannot_edit_non_draft") {
-          renderForbidden_("แก้ไขยอดเงินได้เฉพาะตอนรายการยังเป็น Draft"); return;
+          renderForbidden_("แก้ไขจำนวนงินได้เฉพาะรายการที่อยู่ในสถานะ Draft"); return;
         }
         if (errCode === "claim_not_found") {
           renderNotFound_(); return;
@@ -263,15 +297,18 @@
         return;
       }
 
-      // Success
+      // Success!
       try { await liff.sendMessages([{ type: "text", text: "CLAIM_DRAFT_UPDATED:" + requestId }]); } catch (e) {}
 
       hideLoader();
+      $("bottomBar").classList.add("hidden");
+      
+      // แสดงหน้าต่างแบบเดียวกับตอนบันทึกร่าง Leave Request สำเร็จ
       $("rootBox").innerHTML = `
         <div class="card text-center py-12 mt-10 border border-[#10B981] shadow-lg shadow-green-100">
           <div class="w-20 h-20 rounded-full bg-[#ECFDF5] flex items-center justify-center text-[#10B981] text-4xl mx-auto mb-4 animate-bounce">✅</div>
           <div class="text-xl font-bold text-[#1F2937]">Amount updated.</div>
-          <div class="text-sm text-[#9CA3AF] mt-2">อัปเดตยอดเงินเรียบร้อยแล้ว</div>
+          <div class="text-sm text-[#9CA3AF] mt-2">ยืนยันรายการต่อในแชท</div>
         </div>
       `;
 
@@ -279,7 +316,7 @@
 
     } catch (e) {
       hideLoader();
-      if (btn) btn.disabled = false;
+      setBtnDisabled_(false);
       alert("❌ Save failed: " + (e?.message || e));
     }
   }
@@ -288,7 +325,10 @@
     showLoader("Loading...");
 
     await liff.init({ liffId: LIFF_ID });
-    if (!liff.isLoggedIn()) { liff.login(); return; }
+    if (!liff.isLoggedIn()) {
+      liff.login();
+      return;
+    }
 
     const params = new URLSearchParams(location.search);
     requestId = String(params.get("requestId") || "").trim();
@@ -299,15 +339,14 @@
       return;
     }
 
-    try { userProfile = await liff.getProfile(); } catch(e) {}
+    userProfile = await liff.getProfile();
 
-    if (userProfile) {
-      $("subTitle").innerHTML = `Hi, <span class="font-bold text-[#1F2937]">${escapeHtml_(userProfile.displayName || "")}</span>`;
-      if (userProfile.pictureUrl) {
-        $("profileImg").src = userProfile.pictureUrl;
-        $("avatarBox").classList.remove("hidden");
-      }
+    if (userProfile.pictureUrl) {
+      $("profileImg").src = userProfile.pictureUrl;
+      $("avatarBox").classList.remove("hidden");
     }
+
+    setHeader_("Edit Amount ✏️", `Hi, <span class="font-bold text-[#1F2937]">${escapeHtml_(userProfile.displayName || "")}</span>`);
 
     let data;
     try {
@@ -320,8 +359,11 @@
 
     if (!data || !data.ok || !data.claim) {
       hideLoader();
-      if (String(data?.error || "") === "claim_not_found") renderNotFound_();
-      else renderSystemError_("ไม่สามารถดึงข้อมูลรายการได้");
+      if (String(data?.error || "") === "claim_not_found") {
+        renderNotFound_();
+      } else {
+        renderSystemError_("ไม่สามารถดึงข้อมูลรายการได้");
+      }
       return;
     }
 
@@ -335,7 +377,7 @@
 
     if (String(claimData.status || "").toUpperCase() !== "DRAFT") {
       hideLoader();
-      renderForbidden_("แก้ไขยอดเงินได้เฉพาะตอนรายการยังเป็น Draft");
+      renderForbidden_("แก้ไขจำนวนเงินได้เฉพาะตอนรายการยังเป็น Draft");
       return;
     }
 
@@ -351,4 +393,3 @@
 </script>
 </body>
 </html>
-
