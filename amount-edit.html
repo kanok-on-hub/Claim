@@ -3,88 +3,65 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover" />
-  <title>Edit Claim Amount</title>
+  <title>Edit Amount</title>
 
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
-    body { 
-      font-family: 'Plus Jakarta Sans', sans-serif; 
-      background-color: #f8fafc; 
-      color: #0f172a; 
-      -webkit-tap-highlight-color: transparent; 
-    }
-    .err { 
-      border-color: #ef4444 !important; 
-      background-color: #fef2f2 !important; 
-      box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.15) !important; 
-    }
-    .btn-disabled { 
-      opacity: 0.5; 
-      cursor: not-allowed; 
-      transform: none !important;
-    }
-    .info-badge { 
-      font-size: 11px; 
-      font-weight: 700; 
-      background: linear-gradient(to right, #eff6ff, #dbeafe); 
-      color: #2563eb; 
-      padding: 6px 14px; 
-      border-radius: 9999px; 
-      border: 1px solid #bfdbfe; 
-      display: inline-flex; 
-      align-items: center; 
-      white-space: nowrap; 
-      box-shadow: 0 2px 4px rgba(37, 99, 235, 0.05);
-    }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background:#F3F4F6; color:#1F2937; -webkit-tap-highlight-color: transparent; }
+    .card { background:#fff; border-radius: 1.25rem; border:1px solid #E5E7EB; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); padding: 1.1rem; }
+
+    .input { background:#F9FAFB; border:1px solid #D1D5DB; border-radius:.9rem; padding:.85rem; width:100%; outline:none; transition:.2s; font-size:.95rem; color:#374151; font-weight: bold; }
+    .input:focus { background:#fff; border-color:#3B82F6; box-shadow:0 0 0 3px rgba(59,130,246,.15); }
+    .err { border-color:#EF4444 !important; background-color:#FEF2F2 !important; box-shadow:0 0 0 3px rgba(239,68,68,.15) !important; }
+
+    .info-badge { font-size:11px; font-weight:700; background:#EFF6FF; color:#2563EB; padding:4px 12px; border-radius:9999px; border:1px solid #DBEAFE; display:inline-flex; align-items:center; white-space:nowrap; }
+
+    .btn-disabled { opacity: .55; cursor: not-allowed; }
     ::-webkit-scrollbar { display: none; }
   </style>
 </head>
 
-<body class="pb-28 antialiased bg-gradient-to-br from-slate-50 to-blue-50 min-h-screen">
+<body class="pb-24 antialiased">
   <div class="max-w-md mx-auto min-h-screen flex flex-col relative">
 
-    <div class="bg-white/80 backdrop-blur-lg px-6 pt-12 pb-6 rounded-b-[2rem] shadow-[0_4px_20px_rgb(0,0,0,0.03)] mb-6 relative z-10 border-b border-white">
+    <div class="bg-white px-6 pt-10 pb-4 rounded-b-3xl shadow-sm mb-5 relative z-10 border-b border-slate-100">
       <div class="flex items-center gap-4">
-        <div id="avatarBox" class="w-14 h-14 rounded-full overflow-hidden border-[3px] border-white shadow-md hidden">
+        <div id="avatarBox" class="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-md ring-2 ring-blue-50 hidden">
           <img id="profileImg" src="" class="w-full h-full object-cover" alt="profile">
         </div>
         <div class="flex-1">
-          <h1 id="title" class="text-2xl font-extrabold text-slate-800 tracking-tight">Edit Amount ✏️</h1>
-          <p id="subTitle" class="text-slate-500 text-sm font-medium mt-1 flex items-center gap-2">
-            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span> Loading Profile...
+          <h1 id="title" class="text-2xl font-bold text-[#1F2937] tracking-tight">Edit Amount ✏️</h1>
+          <p id="subTitle" class="text-[#9CA3AF] text-sm font-medium mt-0.5 flex items-center gap-1">
+            <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Loading...
           </p>
         </div>
         <span id="statusBadge" class="hidden info-badge">Draft</span>
       </div>
     </div>
 
-    <div class="px-5 space-y-5 flex-1" id="rootBox">
-      </div>
+    <div class="px-5 pb-24" id="rootBox"></div>
 
-    <div class="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-white via-white/95 to-transparent pt-10 pb-[calc(1.5rem+env(safe-area-inset-bottom))] px-6 z-40" id="bottomBar">
-      <button id="submitBtn"
-        onclick="handleSubmit()"
-        class="w-full bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white py-4.5 rounded-2xl font-bold text-lg shadow-[0_8px_20px_rgba(59,130,246,0.3)] active:scale-[0.98] transition-all duration-200">
-        บันทึกข้อมูล
+    <div class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-[#F3F4F6] p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] z-40 hidden" id="bottomBar">
+      <button id="submitBtn" onclick="handleSubmit()"
+        class="w-full bg-[#60A5FA] hover:bg-[#3B82F6] text-white py-4 rounded-2xl font-bold text-lg shadow-lg shadow-blue-200 active:scale-[0.98] transition-all">
+        บันทึกยอดเงิน
       </button>
     </div>
 
-    <div id="loader" class="fixed inset-0 bg-slate-900/20 backdrop-blur-sm hidden items-center justify-center z-50 transition-opacity">
-      <div class="bg-white p-7 rounded-[2rem] shadow-2xl flex flex-col items-center max-w-[200px] w-full border border-white">
-        <div class="w-12 h-12 border-[4px] border-slate-100 border-t-blue-500 rounded-full animate-spin mb-5"></div>
-        <div class="font-bold text-slate-700 text-sm tracking-wide" id="loaderText">Processing...</div>
+    <div id="loader" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden items-center justify-center z-50">
+      <div class="bg-white p-6 rounded-2xl shadow-xl flex flex-col items-center max-w-[180px] w-full">
+        <div class="w-10 h-10 border-4 border-[#F3F4F6] border-t-[#3B82F6] rounded-full animate-spin mb-4"></div>
+        <div class="font-bold text-[#1F2937] text-sm" id="loaderText">Processing...</div>
       </div>
     </div>
   </div>
 
 <script>
-  // ================= CONFIG =================
   const LIFF_ID = "2008997153-opOWuU0Y";
   const API_URL = "https://script.google.com/macros/s/AKfycbzjatOY93-6QIVPdBSxJyzQhMw9DfqwlgFVdvEanLpZgNZ_1ACwyrUKMGvgnCArwSzWHQ/exec";
-  // ==========================================
 
   const $ = (id) => document.getElementById(id);
 
@@ -143,51 +120,56 @@
     btn.classList.toggle("btn-disabled", !!disabled);
   }
 
-  // --- UI Components ---
+  function kvRow_(label, valueHtml) {
+    return `
+      <div class="flex items-baseline space-x-3">
+        <span class="text-[#9CA3AF] text-xs w-20 flex-shrink-0">${escapeHtml_(label)}</span>
+        <span class="font-bold text-[#1F2937] text-sm break-words flex-1 text-right">${valueHtml}</span>
+      </div>`;
+  }
+
+  // --- Screens ---
   function renderSystemError_(msg) {
-    $("title").textContent = "System Error";
-    $("subTitle").textContent = "Please try again";
-    $("rootBox").innerHTML = `
-      <div class="bg-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 text-center py-12 px-6">
-        <div class="text-5xl mb-4">⚠️</div>
-        <div class="text-xl font-bold text-slate-800">System Error</div>
-        <div class="text-sm text-slate-500 mt-2">${escapeHtml_(msg || "ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองใหม่อีกครั้ง")}</div>
-        <button class="w-full mt-8 bg-slate-800 hover:bg-slate-700 text-white py-4 rounded-2xl font-bold active:scale-[0.98] transition-all" onclick="location.reload()">Try Again</button>
-        <button class="w-full mt-3 bg-white border border-slate-200 text-slate-500 py-4 rounded-2xl font-bold hover:bg-slate-50 transition-colors active:scale-[0.98]" onclick="doneAndExit()">Close</button>
-      </div>
-    `;
+    setHeader_("System Error", "Please try again");
+    setStatusBadge_("");
     $("bottomBar").classList.add("hidden");
+    $("rootBox").innerHTML = `
+      <div class="card text-center py-10 mt-6">
+        <div class="text-4xl mb-3">⚠️</div>
+        <div class="text-lg font-bold text-[#1F2937]">System Error</div>
+        <div class="text-sm text-[#9CA3AF] mt-2">${escapeHtml_(msg || "ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองใหม่อีกครั้ง")}</div>
+        <button class="w-full mt-6 bg-[#60A5FA] hover:bg-[#3B82F6] shadow-lg shadow-blue-200 text-white py-3.5 rounded-2xl font-bold active:scale-[0.98] transition-all" onclick="location.reload()">Try Again</button>
+        <button class="w-full mt-3 bg-white border border-[#E5E7EB] text-[#9CA3AF] py-3 rounded-2xl font-bold hover:bg-[#F9FAFB] transition-colors active:scale-[0.98]" onclick="doneAndExit()">Close</button>
+      </div>`;
   }
 
   function renderNotFound_() {
-    $("title").textContent = "Not Found";
-    $("subTitle").textContent = "Error";
-    $("rootBox").innerHTML = `
-      <div class="bg-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 text-center py-12 px-6">
-        <div class="text-5xl mb-4">📄❓</div>
-        <div class="text-xl font-bold text-slate-800">ไม่พบรายการเบิกเงินค่ะ</div>
-        <div class="text-sm text-slate-500 mt-2">โปรดตรวจสอบลิงก์อีกครั้ง</div>
-        <button class="w-full mt-8 bg-blue-500 hover:bg-blue-600 shadow-[0_8px_20px_rgba(59,130,246,0.2)] text-white py-4 rounded-2xl font-bold active:scale-[0.98] transition-all" onclick="doneAndExit()">ปิดหน้าต่าง</button>
-      </div>
-    `;
+    setHeader_("Not Found", "Error");
+    setStatusBadge_("");
     $("bottomBar").classList.add("hidden");
+    $("rootBox").innerHTML = `
+      <div class="card text-center py-10 mt-6">
+        <div class="text-4xl mb-3">📄❓</div>
+        <div class="text-lg font-bold text-[#1F2937]">ไม่พบรายการเบิกเงินค่ะ</div>
+        <div class="text-sm text-[#9CA3AF] mt-2">โปรดตรวจสอบลิงก์อีกครั้ง</div>
+        <button class="w-full mt-6 bg-[#60A5FA] hover:bg-[#3B82F6] shadow-lg shadow-blue-200 text-white py-3.5 rounded-2xl font-bold active:scale-[0.98] transition-all" onclick="doneAndExit()">ปิดหน้าต่าง</button>
+      </div>`;
   }
 
   function renderForbidden_(msg) {
-    $("title").textContent = "Not Allowed";
-    $("subTitle").textContent = "Action not permitted";
-    $("rootBox").innerHTML = `
-      <div class="bg-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 text-center py-12 px-6">
-        <div class="text-5xl mb-4">⛔</div>
-        <div class="text-xl font-bold text-slate-800">ไม่สามารถแก้ไขยอดเงินได้</div>
-        <div class="text-sm text-slate-500 mt-2">${escapeHtml_(msg || "รายการนี้ไม่อยู่ในสถานะ Draft หรือไม่ใช่ของคุณ")}</div>
-        <button class="w-full mt-8 bg-slate-800 hover:bg-slate-700 text-white py-4 rounded-2xl font-bold active:scale-[0.98] transition-all" onclick="doneAndExit()">ปิดหน้าต่าง</button>
-      </div>
-    `;
+    setHeader_("Not Allowed", "Action not permitted");
+    setStatusBadge_("");
     $("bottomBar").classList.add("hidden");
+    $("rootBox").innerHTML = `
+      <div class="card text-center py-10 mt-6">
+        <div class="text-4xl mb-3">⛔</div>
+        <div class="text-lg font-bold text-[#1F2937]">ไม่สามารถแก้ไขยอดเงินได้</div>
+        <div class="text-sm text-[#9CA3AF] mt-2">${escapeHtml_(msg || "รายการนี้ไม่อยู่ในสถานะ Draft หรือไม่ใช่ของคุณ")}</div>
+        <button class="w-full mt-6 bg-[#60A5FA] hover:bg-[#3B82F6] shadow-lg shadow-blue-200 text-white py-3.5 rounded-2xl font-bold active:scale-[0.98] transition-all" onclick="doneAndExit()">ปิดหน้าต่าง</button>
+      </div>`;
   }
 
-  // --- Formatters ---
+  // --- Helpers ---
   function formatAmountForInput_(v) {
     const n = Number(v || 0);
     if (isNaN(n)) return "";
@@ -197,7 +179,7 @@
   function formatAmountTHB_(v) {
     const n = Number(v || 0);
     if (isNaN(n)) return "-";
-    return n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " บาท";
   }
 
   function shortReqId_(reqId) {
@@ -226,61 +208,40 @@
     $("amountErr").classList.remove("hidden");
   }
 
-  // --- Main Form Render ---
+  // --- Main Render ---
   function renderForm_(claim) {
     const reqNo = shortReqId_(claim.requestId);
     const status = String(claim.status || "").toUpperCase();
 
-    setHeader_("Edit Amount ✏️", `Hi, <span class="font-bold text-slate-800">${escapeHtml_(userProfile?.displayName || "")}</span>`);
+    setHeader_("Edit Amount ✏️", `Hi, <span class="font-bold text-[#1F2937]">${escapeHtml_(userProfile?.displayName || "")}</span>`);
     setStatusBadge_(status || "Draft");
 
     $("rootBox").innerHTML = `
-      <div class="bg-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-slate-100 p-6 space-y-6">
+      <div class="card mb-5 text-center pt-6 pb-5 mt-2">
+         <div class="w-16 h-16 rounded-full bg-[#EFF6FF] flex items-center justify-center text-[#3B82F6] text-3xl mx-auto mb-3 shadow-inner">💸</div>
+         <div class="font-bold text-[#1F2937] text-lg">Claim Amount</div>
+         <div class="text-xs text-[#9CA3AF] mt-1 font-mono">Req No. ${escapeHtml_(reqNo)}</div>
+      </div>
+
+      <div class="card space-y-4 mb-5">
+        <div class="space-y-3 px-1 mt-1">
+          ${kvRow_("Company", escapeHtml_(claim.company || "-"))}
+          ${kvRow_("Status", `<span class="text-[#2563EB]">${escapeHtml_(status || "-")}</span>`)}
+          ${kvRow_("Current", escapeHtml_(formatAmountTHB_(claim.amount)))}
+        </div>
         
-        <div class="text-center pb-2 border-b border-slate-50">
-          <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-50/80 rounded-[1.25rem] mb-4">
-            <span class="text-3xl">💸</span>
-          </div>
-          <div class="text-xl font-extrabold text-slate-800 tracking-tight">Claim Amount</div>
-          <div class="text-xs text-slate-400 mt-1 font-mono tracking-wide bg-slate-50 inline-block px-3 py-1 rounded-full border border-slate-100">Req No. ${escapeHtml_(reqNo)}</div>
+        <hr class="border-[#F3F4F6] my-4" />
+        
+        <div class="px-1">
+          <label class="text-sm font-bold text-[#1F2937] block mb-2">New Amount <span class="text-[#EF4444]">*</span></label>
+          <input id="amountInput" type="text" inputmode="decimal" class="input text-center text-lg text-[#2563EB]" placeholder="เช่น 1200 หรือ 1,200.50" value="${escapeHtml_(formatAmountForInput_(claim.amount))}">
+          <div id="amountErr" class="hidden text-xs text-[#EF4444] mt-2 font-bold text-center"></div>
         </div>
 
-        <div class="grid grid-cols-2 gap-3">
-          <div class="bg-slate-50/80 rounded-2xl border border-slate-100 p-3.5 text-center">
-            <div class="text-[10px] uppercase tracking-widest font-bold text-slate-400">Company</div>
-            <div class="text-sm font-bold text-slate-700 mt-1 truncate">${escapeHtml_(claim.company || "-")}</div>
-          </div>
-          <div class="bg-slate-50/80 rounded-2xl border border-slate-100 p-3.5 text-center">
-            <div class="text-[10px] uppercase tracking-widest font-bold text-slate-400">Status</div>
-            <div class="text-sm font-bold text-slate-700 mt-1 truncate">${escapeHtml_(status || "-")}</div>
-          </div>
-        </div>
-
-        <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border border-blue-100 p-5 text-center relative overflow-hidden">
-          <div class="absolute -right-4 -top-4 w-16 h-16 bg-white/40 rounded-full blur-xl"></div>
-          <div class="text-[11px] uppercase tracking-widest font-bold text-blue-500 mb-1 relative z-10">Current Amount</div>
-          <div class="text-3xl font-black text-blue-700 relative z-10 flex justify-center items-baseline gap-1">
-            <span class="text-lg text-blue-500 font-bold">฿</span> 
-            ${escapeHtml_(formatAmountTHB_(claim.amount))}
-          </div>
-        </div>
-
-        <div class="pt-2">
-          <label class="text-sm font-extrabold text-slate-700 block mb-2 ml-1">New Amount <span class="text-red-500">*</span></label>
-          <div class="relative">
-            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-lg">฿</span>
-            <input id="amountInput" type="text" inputmode="decimal" 
-              class="w-full bg-slate-50 border-2 border-slate-100 rounded-[1.25rem] py-4 pl-10 pr-4 text-xl font-bold text-slate-800 outline-none focus:bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-400/10 transition-all placeholder:font-medium placeholder:text-slate-300" 
-              placeholder="1,200.50" 
-              value="${escapeHtml_(formatAmountForInput_(claim.amount))}">
-          </div>
-          <div id="amountErr" class="hidden text-xs text-red-500 mt-2 font-bold px-2"></div>
-        </div>
-
-        <div class="flex items-start gap-3 bg-amber-50 rounded-2xl p-4 border border-amber-100/50">
-          <span class="text-amber-500 text-base mt-0.5">💡</span>
-          <div class="text-[12px] text-amber-700 font-medium leading-relaxed pr-2">
-            สามารถแก้ไขยอดเงินได้เฉพาะตอนรายการยังเป็น <span class="font-bold underline decoration-amber-300 underline-offset-2">Draft</span> เท่านั้น
+        <div class="flex items-start gap-2 bg-[#F8FAFC] p-3 rounded-xl border border-[#F1F5F9] mt-4">
+          <span class="text-[#94A3B8] mt-0.5">ℹ️</span>
+          <div class="text-[11px] text-[#64748B] font-medium leading-relaxed">
+            สามารถแก้ไขยอดเงินเบิกได้เฉพาะตอนรายการยังเป็น Draft เท่านั้น
           </div>
         </div>
       </div>
@@ -291,6 +252,7 @@
     setBtnDisabled_(false);
   }
 
+  // --- API Calls ---
   async function apiGetClaim_(requestId) {
     const res = await fetch(API_URL + "?action=get_claim&requestId=" + encodeURIComponent(requestId) + "&t=" + Date.now());
     return res.json();
@@ -318,7 +280,7 @@
     }
 
     try {
-      showLoader("Saving Updates...");
+      showLoader("Saving...");
       setBtnDisabled_(true);
 
       const data = await postFormUrlEncoded_({
@@ -333,6 +295,7 @@
         setBtnDisabled_(false);
 
         const errCode = String(data?.error || "unknown_error");
+
         if (errCode === "missing_amount" || errCode === "invalid_amount") {
           showErr_("กรุณาระบุยอดเงินให้ถูกต้อง"); return;
         }
@@ -345,28 +308,24 @@
         if (errCode === "claim_not_found") {
           renderNotFound_(); return;
         }
+
         alert("❌ Save failed: " + errCode);
         return;
       }
 
-      // Success! Update LINE Chat via LIFF
-      try {
-        await liff.sendMessages([{ type: "text", text: "CLAIM_DRAFT_UPDATED:" + requestId }]);
-      } catch (e) {}
+      try { await liff.sendMessages([{ type: "text", text: "CLAIM_DRAFT_UPDATED:" + requestId }]); } catch (e) {}
 
       hideLoader();
       $("bottomBar").classList.add("hidden");
-      
-      // Success Screen
       $("rootBox").innerHTML = `
-        <div class="bg-white rounded-[2rem] text-center py-12 px-6 mt-8 border-2 border-emerald-400 shadow-[0_10px_40px_rgba(16,185,129,0.15)] relative overflow-hidden">
-          <div class="w-24 h-24 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-500 text-5xl mx-auto mb-5 animate-[bounce_1s_ease-in-out_infinite]">✅</div>
-          <div class="text-2xl font-black text-slate-800">Amount Updated!</div>
-          <div class="text-sm text-slate-500 mt-2 font-medium">บันทึกข้อมูลเรียบร้อยแล้ว<br>ระบบได้ส่งข้อมูลกลับไปที่แชท LINE แล้วครับ</div>
+        <div class="card text-center py-12 mt-10 border border-[#10B981] shadow-lg shadow-green-100">
+          <div class="w-20 h-20 rounded-full bg-[#ECFDF5] flex items-center justify-center text-[#10B981] text-4xl mx-auto mb-4 animate-bounce">✅</div>
+          <div class="text-xl font-bold text-[#1F2937]">Amount updated.</div>
+          <div class="text-sm text-[#9CA3AF] mt-2">อัปเดตยอดเงินเรียบร้อยแล้ว</div>
         </div>
       `;
 
-      setTimeout(() => doneAndExit(), 1500);
+      setTimeout(() => doneAndExit(), 1200);
 
     } catch (e) {
       hideLoader();
@@ -376,24 +335,16 @@
   }
 
   async function init() {
-    // Check if running in browser for testing
-    const isLocalTest = !window.liff || location.hostname === "localhost" || location.hostname === "127.0.0.1";
-    
-    if (!isLocalTest) {
-      showLoader("Loading App...");
-      await liff.init({ liffId: LIFF_ID });
-      if (!liff.isLoggedIn()) {
-        liff.login();
-        return;
-      }
-      userProfile = await liff.getProfile();
-    } else {
-      // Mock data for browser preview
-      userProfile = { userId: "Umock123", displayName: "Test User", pictureUrl: "https://i.pravatar.cc/150" };
+    showLoader("Loading...");
+
+    await liff.init({ liffId: LIFF_ID });
+    if (!liff.isLoggedIn()) {
+      liff.login();
+      return;
     }
 
     const params = new URLSearchParams(location.search);
-    requestId = String(params.get("requestId") || "REQ-MOCK").trim();
+    requestId = String(params.get("requestId") || "").trim();
 
     if (!requestId) {
       hideLoader();
@@ -401,19 +352,15 @@
       return;
     }
 
+    userProfile = await liff.getProfile();
+
     if (userProfile.pictureUrl) {
       $("profileImg").src = userProfile.pictureUrl;
       $("avatarBox").classList.remove("hidden");
     }
 
-    setHeader_("Edit Amount ✏️", `Hi, <span class="font-bold text-slate-800">${escapeHtml_(userProfile.displayName || "")}</span>`);
-
-    if (isLocalTest && params.get("requestId") === "REQ-MOCK") {
-      // Mock render for testing visual
-      hideLoader();
-      renderForm_({ requestId: "REQ-000123", status: "DRAFT", company: "TokTok Co.,Ltd.", amount: "3500", userId: "Umock123" });
-      return;
-    }
+    setHeader_("Edit Amount ✏️", `Hi, <span class="font-bold text-[#1F2937]">${escapeHtml_(userProfile.displayName || "")}</span>`);
+    setStatusBadge_("Loading");
 
     let data;
     try {
@@ -455,10 +402,8 @@
   init().catch(err => {
     console.error(err);
     hideLoader();
-    renderSystemError_("Init Error: " + (err?.message || err));
+    renderSystemError_("LIFF Init Error: " + (err?.message || err));
   });
 </script>
 </body>
 </html>
-
-
