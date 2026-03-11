@@ -241,7 +241,6 @@
           ${kvRow_("Amount", escapeHtml_(formatAmountTHB_(claim.amount)))}
           ${kvRow_("Attach", buildViewLinkHtml_(claim.requestAttachmentUrl, "คลิกเพื่อดูไฟล์"))}
           ${kvRow_("Approver", escapeHtml_(approver.fullName || approver.displayName || userProfile?.displayName || "-"))}
-          ${kvRow_("Status", escapeHtml_(status || "-"))}
         </div>
       </div>
 
