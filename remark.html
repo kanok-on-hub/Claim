@@ -95,8 +95,8 @@
   }
 
   function setHeader_(title, subtitle) {
-    if(title) $("title").textContent = title;
-    if(subtitle) $("subTitle").innerHTML = subtitle;
+    if (title) $("title").textContent = title;
+    if (subtitle) $("subTitle").innerHTML = subtitle;
   }
 
   function setBtnDisabled_(disabled) {
@@ -187,6 +187,26 @@
     }
   }
 
+  function isRejectableStatus_(status) {
+    const st = String(status || "").toUpperCase();
+    return st === "SUBMITTED" || st === "WAITING_PAYMENT_SLIP";
+  }
+
+  function statusBadgeText_(status) {
+    const st = String(status || "").toUpperCase();
+    if (st === "WAITING_PAYMENT_SLIP") return "WAITING_PAYMENT_SLIP";
+    if (st === "SUBMITTED") return "SUBMITTED";
+    return st || "-";
+  }
+
+  function statusHintText_(status) {
+    const st = String(status || "").toUpperCase();
+    if (st === "WAITING_PAYMENT_SLIP") {
+      return "รายการนี้อยู่ระหว่างขั้นตอนจ่ายเงิน และยังสามารถปฏิเสธได้";
+    }
+    return "รายการนี้รอการอนุมัติ และยังสามารถปฏิเสธได้";
+  }
+
   // --- Main Form Render ---
   function renderRejectForm_(bundle) {
     const claim = bundle.claim || {};
@@ -195,10 +215,8 @@
     const reqNo = shortReqId_(claim.requestId);
     const status = String(claim.status || "").toUpperCase();
 
-    // รูปแบบการดึงชื่อ LINE Display Name
     const lineName = String(claim.name || requester.displayName || "-");
 
-    // รูปแบบการดึง Full Name (Nickname)
     const fn = String(requester.fullName || "").trim();
     const nn = String(requester.nickname || "").trim();
     let fullNameNick = "-";
@@ -212,9 +230,9 @@
       <div class="card space-y-3">
         <div class="flex justify-between items-center px-1 h-7">
           <label class="text-sm font-bold text-[#1F2937]">Claim Info</label>
-          <span class="info-badge">${escapeHtml_(status || "SUBMITTED")}</span>
+          <span class="info-badge">${escapeHtml_(statusBadgeText_(status))}</span>
         </div>
-        
+
         <div class="space-y-3 px-1 mt-2">
           ${kvRow_("Req No.", `<span class="font-mono">${escapeHtml_(reqNo)}</span>`)}
           ${kvRow_("LINE", escapeHtml_(lineName))}
@@ -222,10 +240,18 @@
           ${kvRow_("Company", escapeHtml_(claim.company || requester.company || "-"))}
           ${kvRow_("Amount", escapeHtml_(formatAmountTHB_(claim.amount)))}
           ${kvRow_("Attach", buildViewLinkHtml_(claim.requestAttachmentUrl, "คลิกเพื่อดูไฟล์"))}
+          ${claim.transferSlipUrl ? kvRow_("Slip", buildViewLinkHtml_(claim.transferSlipUrl, "คลิกเพื่อดูสลิป")) : ""}
         </div>
       </div>
 
       <div class="card space-y-4">
+        <div class="flex items-start gap-2 bg-[#F8FAFC] p-3 rounded-xl border border-[#F1F5F9]">
+          <span class="text-[#94A3B8] mt-0.5">ℹ️</span>
+          <div class="text-[11px] text-[#64748B] font-medium leading-relaxed">
+            ${escapeHtml_(statusHintText_(status))}
+          </div>
+        </div>
+
         <div>
           <label class="block text-sm font-bold text-[#1F2937] ml-1 mb-2">Rejection reason <span class="text-[#EF4444]">*</span></label>
           <textarea id="rejectRemark" rows="4" class="input resize-none" placeholder="Please provide a reason for rejection"></textarea>
@@ -318,7 +344,6 @@
         return;
       }
 
-      // Success!
       try {
         await liff.sendMessages([{ type: "text", text: "CLAIM_REJECTED:" + requestId }]);
       } catch (e) {}
@@ -396,9 +421,9 @@
       return;
     }
 
-    if (String(claim.status || "").toUpperCase() !== "SUBMITTED") {
+    if (!isRejectableStatus_(claim.status)) {
       hideLoader();
-      renderForbidden_("ปฏิเสธได้เฉพาะรายการที่อยู่ในสถานะ SUBMITTED");
+      renderForbidden_("รายการนี้ไม่อยู่ในสถานะที่สามารถปฏิเสธได้");
       return;
     }
 
