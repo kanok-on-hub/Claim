@@ -168,9 +168,12 @@
     return n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " บาท";
   }
 
-  function shortReqId_(reqId) {
-    const s = String(reqId || "");
-    return "#" + (s.length <= 8 ? s : s.slice(-8));
+  function formatReqNo_(claim) {
+    const shortId = String(claim?.shortRequestId || "").trim();
+    if (shortId) return "#" + shortId;
+    const reqId = String(claim?.requestId || "").trim();
+    if (!reqId) return "-";
+    return "#" + (reqId.length <= 8 ? reqId : reqId.slice(-8));
   }
 
   function parseAmountClient_(raw) {
@@ -196,7 +199,7 @@
 
   // --- Main Form Render ---
   function renderForm_(claim) {
-    const reqNo = shortReqId_(claim.requestId);
+    const reqNo = formatReqNo_(claim);
     const status = String(claim.status || "").toUpperCase();
 
     setHeader_("Edit Amount ✏️", `Hi, <span class="font-bold text-[#1F2937]">${escapeHtml_(userProfile?.displayName || "")}</span>`);
@@ -225,7 +228,7 @@
         <div class="flex items-start gap-2 bg-[#F8FAFC] p-3 rounded-xl border border-[#F1F5F9]">
           <span class="text-[#94A3B8] mt-0.5">ℹ️</span>
           <div class="text-[11px] text-[#64748B] font-medium leading-relaxed">
-            สามารถแก้ไขจำนวนเงินได้เฉพาะรายการที่อยูในสถานะ Draft เท่านั้น
+            สามารถแก้ไขจำนวนเงินได้เฉพาะรายการที่อยู่ในสถานะ Draft เท่านั้น
           </div>
         </div>
       </div>
@@ -281,29 +284,38 @@
         const errCode = String(data?.error || "unknown_error");
 
         if (errCode === "missing_amount" || errCode === "invalid_amount") {
-          showErr_("กรุณาระบุจำนวนเงินให้ถูกต้อง"); return;
+          showErr_("กรุณาระบุจำนวนเงินให้ถูกต้อง");
+          return;
         }
         if (errCode === "not_owner") {
-          renderForbidden_("รายการนี้ไม่ใช่ของคุณ"); return;
+          renderForbidden_("รายการนี้ไม่ใช่ของคุณ");
+          return;
         }
         if (errCode === "cannot_edit_non_draft") {
-          renderForbidden_("แก้ไขจำนวนงินได้เฉพาะรายการที่อยู่ในสถานะ Draft"); return;
+          renderForbidden_("แก้ไขจำนวนเงินได้เฉพาะรายการที่อยู่ในสถานะ Draft");
+          return;
         }
         if (errCode === "claim_not_found") {
-          renderNotFound_(); return;
+          renderNotFound_();
+          return;
         }
 
         alert("❌ Save failed: " + errCode);
         return;
       }
 
-      // Success!
-      try { await liff.sendMessages([{ type: "text", text: "CLAIM_DRAFT_UPDATED:" + requestId }]); } catch (e) {}
+      const shortId = String(claimData?.shortRequestId || "").trim();
+      const notifyText = shortId
+        ? `อัปเดตรายการแล้ว #${shortId}`
+        : `CLAIM_DRAFT_UPDATED:${requestId}`;
+
+      try {
+        await liff.sendMessages([{ type: "text", text: notifyText }]);
+      } catch (e) {}
 
       hideLoader();
       $("bottomBar").classList.add("hidden");
-      
-      // แสดงหน้าต่างแบบเดียวกับตอนบันทึกร่าง Leave Request สำเร็จ
+
       $("rootBox").innerHTML = `
         <div class="card text-center py-12 mt-10 border border-[#10B981] shadow-lg shadow-green-100">
           <div class="w-20 h-20 rounded-full bg-[#ECFDF5] flex items-center justify-center text-[#10B981] text-4xl mx-auto mb-4 animate-bounce">✅</div>
@@ -393,3 +405,5 @@
 </script>
 </body>
 </html>
+
+
