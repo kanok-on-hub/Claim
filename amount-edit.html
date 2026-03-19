@@ -117,7 +117,6 @@
       </div>`;
   }
 
-  // --- Screens ---
   function renderSystemError_(msg) {
     setHeader_("System Error", "Please try again");
     $("bottomBar").classList.add("hidden");
@@ -155,7 +154,6 @@
       </div>`;
   }
 
-  // --- Helpers ---
   function formatAmountForInput_(v) {
     const n = Number(v || 0);
     if (isNaN(n)) return "";
@@ -171,6 +169,7 @@
   function formatReqNo_(claim) {
     const shortId = String(claim?.shortRequestId || "").trim();
     if (shortId) return "#" + shortId;
+
     const reqId = String(claim?.requestId || "").trim();
     if (!reqId) return "-";
     return "#" + (reqId.length <= 8 ? reqId : reqId.slice(-8));
@@ -197,7 +196,6 @@
     $("amountErr").classList.remove("hidden");
   }
 
-  // --- Main Form Render ---
   function renderForm_(claim) {
     const reqNo = formatReqNo_(claim);
     const status = String(claim.status || "").toUpperCase();
@@ -239,7 +237,6 @@
     setBtnDisabled_(false);
   }
 
-  // --- API Calls ---
   async function apiGetClaim_(requestId) {
     const res = await fetch(API_URL + "?action=get_claim&requestId=" + encodeURIComponent(requestId) + "&t=" + Date.now());
     return res.json();
@@ -405,5 +402,3 @@
 </script>
 </body>
 </html>
-
-
