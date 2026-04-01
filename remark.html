@@ -148,8 +148,13 @@
     return `
       <div class="flex items-baseline space-x-3">
         <span class="text-[#9CA3AF] text-xs w-20 flex-shrink-0">${escapeHtml_(label)}</span>
-        <span class="font-bold text-[#1F2937] text-sm break-words flex-1">${valueHtml}</span>
+        <span class="font-bold text-[#1F2937] text-sm break-words flex-1 whitespace-pre-wrap">${valueHtml}</span>
       </div>`;
+  }
+
+  function noteDisplay_(v) {
+    const s = String(v || "").trim();
+    return s ? escapeHtml_(s) : "—";
   }
 
   function guardRejectStatus_(claim) {
@@ -166,6 +171,7 @@
   function renderViewRemark_(claim, requesterPerson) {
     const remark = String(claim.remark || "").trim() || "-";
     const reqNo = shortReqLabel_(claim);
+    const note = String(claim.note || "").trim();
 
     const lineName = String(claim.name || "-");
     const fullNameNick = formatFullNameNick_(requesterPerson?.fullName, requesterPerson?.nickname);
@@ -184,6 +190,7 @@
           ${kvRow_("Line", escapeHtml_(lineName))}
           ${kvRow_("Name", escapeHtml_(fullNameNick))}
           ${kvRow_("Amount", escapeHtml_(formatAmountTHB_(claim.amount)))}
+          ${kvRow_("Note", noteDisplay_(note))}
         </div>
       </div>
 
@@ -211,6 +218,7 @@
     const lineName = String(claim.name || "-");
     const fullNameNick = formatFullNameNick_(requesterPerson?.fullName, requesterPerson?.nickname);
     const status = String(claim.status || "").toUpperCase();
+    const note = String(claim.note || "").trim();
 
     $("title").textContent = "Reject Claim ❌";
 
@@ -228,6 +236,7 @@
           ${kvRow_("Name", escapeHtml_(fullNameNick))}
           ${kvRow_("Company", escapeHtml_(claim.company || "-"))}
           ${kvRow_("Amount", escapeHtml_(formatAmountTHB_(claim.amount)))}
+          ${kvRow_("Note", noteDisplay_(note))}
           ${kvRow_("Attach", attachHtml)}
           ${status === "WAITING_PAYMENT_SLIP" ? kvRow_("Slip", slipHtml) : ""}
         </div>
