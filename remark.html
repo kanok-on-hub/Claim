@@ -152,11 +152,6 @@
       </div>`;
   }
 
-  function noteDisplay_(v) {
-    const s = String(v || "").trim();
-    return s ? escapeHtml_(s) : "—";
-  }
-
   function guardRejectStatus_(claim) {
     const st = String(claim?.status || "").toUpperCase();
     const ok = (st === "SUBMITTED" || st === "WAITING_PAYMENT_SLIP");
@@ -176,6 +171,10 @@
     const lineName = String(claim.name || "-");
     const fullNameNick = formatFullNameNick_(requesterPerson?.fullName, requesterPerson?.nickname);
 
+    const noteRowHtml = note
+      ? kvRow_("Note", escapeHtml_(note))
+      : "";
+
     $("title").textContent = "Remark Details 💬";
 
     $("rootBox").innerHTML = `
@@ -190,7 +189,7 @@
           ${kvRow_("Line", escapeHtml_(lineName))}
           ${kvRow_("Name", escapeHtml_(fullNameNick))}
           ${kvRow_("Amount", escapeHtml_(formatAmountTHB_(claim.amount)))}
-          ${kvRow_("Note", noteDisplay_(note))}
+          ${noteRowHtml}
         </div>
       </div>
 
@@ -220,6 +219,10 @@
     const status = String(claim.status || "").toUpperCase();
     const note = String(claim.note || "").trim();
 
+    const noteRowHtml = note
+      ? kvRow_("Note", escapeHtml_(note))
+      : "";
+
     $("title").textContent = "Reject Claim ❌";
 
     $("rootBox").innerHTML = `
@@ -236,7 +239,7 @@
           ${kvRow_("Name", escapeHtml_(fullNameNick))}
           ${kvRow_("Company", escapeHtml_(claim.company || "-"))}
           ${kvRow_("Amount", escapeHtml_(formatAmountTHB_(claim.amount)))}
-          ${kvRow_("Note", noteDisplay_(note))}
+          ${noteRowHtml}
           ${kvRow_("Attach", attachHtml)}
           ${status === "WAITING_PAYMENT_SLIP" ? kvRow_("Slip", slipHtml) : ""}
         </div>
@@ -397,3 +400,5 @@
 </script>
 </body>
 </html>
+
+
