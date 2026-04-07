@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="th">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover" />
@@ -11,394 +11,417 @@
 
   <style>
     body { font-family: 'Plus Jakarta Sans', sans-serif; background:#F3F4F6; color:#1F2937; -webkit-tap-highlight-color: transparent; }
-    .card { background:#fff; border-radius: 1.25rem; border:1px solid #E5E7EB; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); padding: 1.1rem; }
-
+    .card { background:#fff; border-radius:1.25rem; border:1px solid #E5E7EB; box-shadow:0 4px 6px -1px rgba(0,0,0,.05); padding:1.1rem; }
     .input { background:#F9FAFB; border:1px solid #D1D5DB; border-radius:.9rem; padding:.85rem; width:100%; outline:none; transition:.2s; font-size:.95rem; color:#374151; }
-    .input:focus { background:#fff; border-color:#F87171; box-shadow:0 0 0 3px rgba(248,113,113,.15); }
-    .err { border-color:#EF4444 !important; background-color:#FEF2F2 !important; box-shadow:0 0 0 3px rgba(239,68,68,.15) !important; }
-
-    ::-webkit-scrollbar { display: none; }
+    .input:focus { border-color:#F87171; box-shadow:0 0 0 3px rgba(248,113,113,.15); }
+    .input.err { border-color:#EF4444 !important; background-color:#FEF2F2 !important; box-shadow:0 0 0 3px rgba(239,68,68,.15) !important; }
+    .btn-primary { width:100%; padding:1rem; border-radius:1rem; font-weight:700; font-size:1rem; transition:all .15s; }
+    .btn-primary:active { transform:scale(.98); }
+    .btn-primary:disabled { opacity:.55; cursor:not-allowed; }
+    ::-webkit-scrollbar { display:none; }
   </style>
 </head>
 
 <body class="pb-20 antialiased">
-  <div class="max-w-md mx-auto min-h-screen flex flex-col relative">
+<div class="max-w-md mx-auto min-h-screen flex flex-col relative">
 
-    <div class="bg-white px-6 pt-10 pb-4 rounded-b-3xl shadow-sm mb-5 relative z-10 border-b border-slate-100">
-      <div class="flex items-center gap-4">
-        <div id="avatarBox" class="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-md ring-2 ring-blue-50 hidden">
-          <img id="profileImg" src="" class="w-full h-full object-cover" alt="profile">
-        </div>
-        <div class="flex-1">
-          <h1 id="title" class="text-2xl font-bold text-[#1F2937] tracking-tight">Loading...</h1>
-          <p id="subTitle" class="text-[#9CA3AF] text-sm font-medium mt-0.5 flex items-center gap-1">
-            <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Please wait a moment
-          </p>
-        </div>
+  <!-- Header -->
+  <div class="bg-white px-6 pt-10 pb-4 rounded-b-3xl shadow-sm mb-5 relative z-10 border-b border-slate-100">
+    <div class="flex items-center gap-4">
+      <div id="avatarBox" class="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-md ring-2 ring-blue-50 hidden">
+        <img id="profileImg" src="" class="w-full h-full object-cover" alt="profile">
       </div>
-    </div>
-
-    <div class="px-5 pb-24" id="rootBox"></div>
-
-    <div id="loader" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden items-center justify-center z-50">
-      <div class="bg-white p-6 rounded-2xl shadow-xl flex flex-col items-center max-w-[180px] w-full">
-        <div class="w-10 h-10 border-4 border-[#F3F4F6] border-t-[#3B82F6] rounded-full animate-spin mb-4"></div>
-        <div class="font-bold text-[#1F2937] text-sm" id="loaderText">Processing...</div>
+      <div class="flex-1">
+        <h1 id="title" class="text-2xl font-bold text-[#1F2937] tracking-tight">Loading...</h1>
+        <p id="subTitle" class="text-[#9CA3AF] text-sm font-medium mt-0.5 flex items-center gap-1">
+          <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Please wait
+        </p>
       </div>
     </div>
   </div>
 
+  <!-- Content -->
+  <div class="px-5 pb-24" id="rootBox"></div>
+
+  <!-- Loader -->
+  <div id="loader" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden items-center justify-center z-50">
+    <div class="bg-white p-6 rounded-2xl shadow-xl flex flex-col items-center max-w-[180px] w-full">
+      <div class="w-10 h-10 border-4 border-[#F3F4F6] border-t-[#3B82F6] rounded-full animate-spin mb-4"></div>
+      <div class="font-bold text-[#1F2937] text-sm" id="loaderText">Loading...</div>
+    </div>
+  </div>
+</div>
+
 <script>
-  const LIFF_ID = "2008997153-9ccTGpTL";
-  const API_URL = "https://script.google.com/macros/s/AKfycbzjatOY93-6QIVPdBSxJyzQhMw9DfqwlgFVdvEanLpZgNZ_1ACwyrUKMGvgnCArwSzWHQ/exec";
+"use strict";
 
-  const $ = (id) => document.getElementById(id);
+/* ── Config ──────────────────────────────────────── */
+const LIFF_ID = "2008997153-9ccTGpTL";
+const API_URL = "https://script.google.com/macros/s/AKfycbzjatOY93-6QIVPdBSxJyzQhMw9DfqwlgFVdvEanLpZgNZ_1ACwyrUKMGvgnCArwSzWHQ/exec";
+const MAX_REMARK_LEN = 500;
 
-  function showLoader(msg){ $("loaderText").textContent = msg || "Loading..."; $("loader").classList.remove("hidden"); $("loader").classList.add("flex"); }
-  function hideLoader(){ $("loader").classList.add("hidden"); $("loader").classList.remove("flex"); }
+/* ── State ───────────────────────────────────────── */
+let userProfile = null;
 
-  function doneAndExit(){
-    try {
-      if (window.liff && liff.isInClient()) {
-        liff.closeWindow();
-        return;
-      }
-    } catch(e) {}
-    try { window.close(); } catch(e) {}
+/* ── Helpers ─────────────────────────────────────── */
+const $id = (id) => document.getElementById(id);
+
+function showLoader(msg) { $id("loaderText").textContent = msg || "Loading..."; $id("loader").classList.replace("hidden", "flex"); }
+function hideLoader()    { $id("loader").classList.replace("flex", "hidden"); }
+
+function doneAndExit() {
+  try { if (liff.isInClient()) { liff.closeWindow(); return; } } catch (_) {}
+  try { window.close(); } catch (_) {}
+}
+
+function esc(s) {
+  return String(s ?? "")
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+
+function formatAmountTHB(v) {
+  const n = Number(v || 0);
+  if (isNaN(n)) return "-";
+  return n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " บาท";
+}
+
+function formatFullNameNick(fullName, nickname) {
+  const fn = String(fullName  || "").trim();
+  const nn = String(nickname  || "").trim();
+  if (!fn && !nn) return "-";
+  if (fn && nn)   return fn + " (" + nn + ")";
+  return fn || nn;
+}
+
+function shortReqLabel(claim) {
+  const s = String(claim?.shortRequestId || "").trim();
+  if (s) return "#" + s;
+  const r = String(claim?.requestId || "").trim();
+  if (!r) return "-";
+  return "#" + (r.length <= 8 ? r : r.slice(-8));
+}
+
+function kvRow(label, valueHtml) {
+  return `
+    <div class="flex items-baseline space-x-3">
+      <span class="text-[#9CA3AF] text-xs w-20 flex-shrink-0">${esc(label)}</span>
+      <span class="font-bold text-[#1F2937] text-sm break-words flex-1 whitespace-pre-wrap">${valueHtml}</span>
+    </div>`;
+}
+
+/* ── API calls ───────────────────────────────────── */
+async function apiGetClaimBundle(requestId, actorUserId) {
+  const res = await fetch(
+    API_URL + "?action=get_claim_bundle"
+    + "&requestId="   + encodeURIComponent(requestId)
+    + "&actorUserId=" + encodeURIComponent(actorUserId)
+  );
+  return res.json();
+}
+
+async function apiGetClaimFresh(requestId, actorUserId) {
+  const res = await fetch(
+    API_URL + "?action=get_claim"
+    + "&requestId="   + encodeURIComponent(requestId)
+    + "&actorUserId=" + encodeURIComponent(actorUserId)
+    + "&t=" + Date.now()
+  );
+  return res.json();
+}
+
+async function postForm(obj) {
+  const body = new URLSearchParams();
+  Object.keys(obj || {}).forEach(k => body.set(k, obj[k] == null ? "" : String(obj[k])));
+  const res = await fetch(API_URL, {
+    method:  "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
+    body:    body.toString()
+  });
+  return res.json();
+}
+
+/* ── Error screens ───────────────────────────────── */
+function renderSystemError(msg) {
+  $id("title").textContent    = "System Error";
+  $id("subTitle").textContent = "Please try again";
+  $id("rootBox").innerHTML = `
+    <div class="card text-center py-10">
+      <div class="text-4xl mb-3">⚠️</div>
+      <div class="text-lg font-bold text-[#1F2937]">System Error</div>
+      <div class="text-sm text-[#9CA3AF] mt-2">${esc(msg || "ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองใหม่อีกครั้ง")}</div>
+      <button class="btn-primary bg-[#60A5FA] hover:bg-[#3B82F6] text-white shadow-lg shadow-blue-200 mt-6" onclick="location.reload()">Try Again</button>
+      <button class="btn-primary bg-white border border-[#E5E7EB] text-[#9CA3AF] mt-3 hover:bg-[#F9FAFB]" onclick="doneAndExit()">Close</button>
+    </div>`;
+}
+
+function renderNotFound() {
+  $id("title").textContent    = "Not Found";
+  $id("subTitle").textContent = "Error";
+  $id("rootBox").innerHTML = `
+    <div class="card text-center py-10">
+      <div class="text-4xl mb-3">📄❓</div>
+      <div class="text-lg font-bold text-[#1F2937]">หารายการไม่เจอค่ะ</div>
+      <div class="text-sm text-[#9CA3AF] mt-2">โปรดตรวจสอบลิงก์อีกครั้ง</div>
+      <button class="btn-primary bg-[#60A5FA] hover:bg-[#3B82F6] text-white shadow-lg shadow-blue-200 mt-6" onclick="doneAndExit()">ปิดหน้าต่าง</button>
+    </div>`;
+}
+
+/* ── View: remark (REJECTED) ─────────────────────── */
+function renderViewRemark(claim, requesterPerson) {
+  const remark       = String(claim.remark || "").trim() || "-";
+  const reqNo        = shortReqLabel(claim);
+  const note         = String(claim.note || "").trim();
+  const lineName     = String(claim.name || "-");
+  const fullNameNick = formatFullNameNick(requesterPerson?.fullName, requesterPerson?.nickname);
+
+  $id("title").textContent = "Remark Details 💬";
+
+  $id("rootBox").innerHTML = `
+    <div class="card mb-5 text-center pt-6 pb-5">
+      <div class="w-16 h-16 rounded-full bg-[#FFF0F2] flex items-center justify-center text-3xl mx-auto mb-3 shadow-inner">💬</div>
+      <div class="font-bold text-[#1F2937] text-lg">รายการถูกปฏิเสธ</div>
+      <div class="text-xs text-[#9CA3AF] mt-1 font-mono">Req No. ${esc(reqNo)}</div>
+    </div>
+
+    <div class="card mb-5">
+      <div class="space-y-3 px-1">
+        ${kvRow("Line",   esc(lineName))}
+        ${kvRow("Name",   esc(fullNameNick))}
+        ${kvRow("Amount", esc(formatAmountTHB(claim.amount)))}
+        ${note ? kvRow("Note", esc(note)) : ""}
+      </div>
+    </div>
+
+    <div class="bg-[#FFF5F5] border border-[#FEE2E2] rounded-xl p-4 mb-6">
+      <div class="text-xs font-bold text-[#BE123C] mb-2">Rejection reason:</div>
+      <div class="text-sm text-[#9F1239] whitespace-pre-wrap leading-relaxed">${esc(remark)}</div>
+    </div>
+
+    <button class="btn-primary bg-[#60A5FA] hover:bg-[#3B82F6] text-white shadow-lg shadow-blue-200" onclick="doneAndExit()">ปิดหน้าต่าง</button>`;
+}
+
+/* ── View: reject form ───────────────────────────── */
+function renderReject(claim, requesterPerson) {
+  const reqNo        = shortReqLabel(claim);
+  const status       = String(claim.status || "").toUpperCase();
+  const attUrl       = String(claim.requestAttachmentUrl || "").trim();
+  const slipUrl      = String(claim.transferSlipUrl || "").trim();
+  const lineName     = String(claim.name || "-");
+  const fullNameNick = formatFullNameNick(requesterPerson?.fullName, requesterPerson?.nickname);
+  const note         = String(claim.note || "").trim();
+
+  // Build safe hyperlink HTML (no esc needed for href since these are server-provided Drive URLs)
+  const attachHtml = attUrl
+    ? `<a href="${esc(attUrl)}" target="_blank" rel="noopener" class="text-[#2563EB] underline">คลิกเพื่อดูไฟล์</a>`
+    : "—";
+  const slipHtml = slipUrl
+    ? `<a href="${esc(slipUrl)}" target="_blank" rel="noopener" class="text-[#2563EB] underline">คลิกเพื่อดูสลิป</a>`
+    : "—";
+
+  $id("title").textContent = "Reject Claim ❌";
+
+  $id("rootBox").innerHTML = `
+    <div class="card mb-5">
+      <div class="text-center mb-4">
+        <div class="text-4xl mb-2">📥</div>
+        <div class="font-bold text-lg text-[#1F2937]">${status === "WAITING_PAYMENT_SLIP" ? "Waiting for Decision" : "Pending Approval"}</div>
+        <div class="text-xs font-bold text-[#FBBF24] mt-1">${status === "WAITING_PAYMENT_SLIP" ? "รอตัดสินใจ" : "รออนุมัติ"}</div>
+      </div>
+      <hr class="border-[#F3F4F6] mb-4" />
+      <div class="space-y-3 px-1">
+        ${kvRow("Req No.",  `<span class="font-mono">${esc(reqNo)}</span>`)}
+        ${kvRow("Line",     esc(lineName))}
+        ${kvRow("Name",     esc(fullNameNick))}
+        ${kvRow("Company",  esc(claim.company || "-"))}
+        ${kvRow("Amount",   esc(formatAmountTHB(claim.amount)))}
+        ${note ? kvRow("Note", esc(note)) : ""}
+        ${kvRow("Attach",   attachHtml)}
+        ${status === "WAITING_PAYMENT_SLIP" ? kvRow("Slip", slipHtml) : ""}
+      </div>
+    </div>
+
+    <div class="space-y-2 mb-6 ml-1">
+      <label class="block text-sm font-bold text-[#1F2937]">
+        Rejection reason <span class="text-[#EF4444]">*</span>
+      </label>
+      <textarea id="rejectRemark" rows="3" class="input resize-none"
+                placeholder="Please provide a reason for rejection"
+                maxlength="${MAX_REMARK_LEN}"></textarea>
+      <div id="remarkErr" class="hidden text-xs text-[#EF4444] mt-1.5 font-bold flex items-center">
+        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+        </svg>
+        กรุณากรอกเหตุผลที่ไม่อนุมัติ
+      </div>
+    </div>
+
+    <div class="space-y-3">
+      <button id="submitRejectBtn"
+              data-request-id="${esc(claim.requestId)}"
+              data-short-id="${esc(claim.shortRequestId || "")}"
+              class="btn-primary bg-[#F87171] hover:bg-[#EF4444] text-white shadow-lg shadow-red-200">
+        ยืนยัน
+      </button>
+    </div>`;
+
+  // Fix #13: use data-attributes + addEventListener instead of inline onclick
+  $id("submitRejectBtn").addEventListener("click", function() {
+    submitReject(this.dataset.requestId, this.dataset.shortId);
+  });
+
+  // Clear remark error on input
+  $id("rejectRemark").addEventListener("input", function() {
+    $id("remarkErr").classList.add("hidden");
+    this.classList.remove("err");
+  });
+}
+
+/* ── Submit reject ───────────────────────────────── */
+async function submitReject(requestId, shortRequestId) {
+  const ta     = $id("rejectRemark");
+  const errDiv = $id("remarkErr");
+  const btn    = $id("submitRejectBtn");
+  const remark = (ta?.value || "").trim();
+
+  if (!remark) {
+    errDiv?.classList.remove("hidden");
+    ta?.classList.add("err");
+    return;
+  }
+  if (remark.length > MAX_REMARK_LEN) {
+    alert("เหตุผลยาวเกิน " + MAX_REMARK_LEN + " ตัวอักษรค่ะ");
+    return;
   }
 
-  function escapeHtml_(s) {
-    return String(s ?? "")
-      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
-  }
+  showLoader("Rejecting...");
+  if (btn) btn.disabled = true;
 
-  function escapeAttr_(s) { return escapeHtml_(s).replace(/`/g, "&#96;"); }
-
-  async function apiGetClaimBundle_(requestId) {
-    const res = await fetch(API_URL + "?action=get_claim_bundle&requestId=" + encodeURIComponent(requestId));
-    return res.json();
-  }
-
-  async function apiGetClaimFresh_(requestId) {
-    const res = await fetch(API_URL + "?action=get_claim&requestId=" + encodeURIComponent(requestId) + "&t=" + Date.now());
-    return res.json();
-  }
-
-  async function postFormUrlEncoded_(obj) {
-    const body = new URLSearchParams();
-    Object.keys(obj || {}).forEach(k => body.set(k, obj[k] == null ? "" : String(obj[k])));
-    const res = await fetch(API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
-      body: body.toString()
-    });
-    return res.json();
-  }
-
-  function renderSystemError_(msg) {
-    $("title").textContent = "System Error";
-    $("subTitle").textContent = "Please try again";
-    $("rootBox").innerHTML = `
-      <div class="card text-center py-10">
-        <div class="text-4xl mb-3">⚠️</div>
-        <div class="text-lg font-bold text-[#1F2937]">System Error</div>
-        <div class="text-sm text-[#9CA3AF] mt-2">${escapeHtml_(msg || "ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองใหม่อีกครั้ง")}</div>
-        <button class="w-full mt-6 bg-[#60A5FA] hover:bg-[#3B82F6] shadow-lg shadow-blue-200 text-white py-3.5 rounded-2xl font-bold active:scale-[0.98] transition-all" onclick="location.reload()">Try Again</button>
-        <button class="w-full mt-3 bg-white border border-[#E5E7EB] text-[#9CA3AF] py-3 rounded-2xl font-bold hover:bg-[#F9FAFB] transition-colors active:scale-[0.98]" onclick="doneAndExit()">Close</button>
-      </div>`;
-  }
-
-  function renderNotFound_() {
-    $("title").textContent = "Not Found";
-    $("subTitle").textContent = "Error";
-    $("rootBox").innerHTML = `
-      <div class="card text-center py-10">
-        <div class="text-4xl mb-3">📄❓</div>
-        <div class="text-lg font-bold text-[#1F2937]">หารายการไม่เจอค่ะ</div>
-        <div class="text-sm text-[#9CA3AF] mt-2">โปรดตรวจสอบลิงก์อีกครั้ง</div>
-        <button class="w-full mt-6 bg-[#60A5FA] hover:bg-[#3B82F6] shadow-lg shadow-blue-200 text-white py-3.5 rounded-2xl font-bold active:scale-[0.98] transition-all" onclick="doneAndExit()">ปิดหน้าต่าง</button>
-      </div>`;
-  }
-
-  function shortReqLabel_(claim) {
-    const shortId = String(claim?.shortRequestId || "").trim();
-    if (shortId) return "#" + shortId;
-
-    const reqId = String(claim?.requestId || "").trim();
-    if (!reqId) return "-";
-    return "#" + (reqId.length <= 8 ? reqId : reqId.slice(-8));
-  }
-
-  function formatFullNameNick_(fullName, nickname){
-    const fn = String(fullName || "").trim();
-    const nn = String(nickname || "").trim();
-    if (!fn && !nn) return "-";
-    if (fn && nn) return `${fn} (${nn})`;
-    return fn || nn;
-  }
-
-  function formatAmountTHB_(v) {
-    const n = Number(v || 0);
-    if (isNaN(n)) return "-";
-    return n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " บาท";
-  }
-
-  function kvRow_(label, valueHtml) {
-    return `
-      <div class="flex items-baseline space-x-3">
-        <span class="text-[#9CA3AF] text-xs w-20 flex-shrink-0">${escapeHtml_(label)}</span>
-        <span class="font-bold text-[#1F2937] text-sm break-words flex-1 whitespace-pre-wrap">${valueHtml}</span>
-      </div>`;
-  }
-
-  function guardRejectStatus_(claim) {
-    const st = String(claim?.status || "").toUpperCase();
-    const ok = (st === "SUBMITTED" || st === "WAITING_PAYMENT_SLIP");
-    if (!ok) {
+  try {
+    // Fix #5: use the already-fetched userProfile (no second getProfile call)
+    // Re-fetch latest status to prevent rejecting an already-decided claim
+    const latest = await apiGetClaimFresh(requestId, userProfile.userId);
+    const st     = String(latest?.claim?.status || "").toUpperCase();
+    if (st !== "SUBMITTED" && st !== "WAITING_PAYMENT_SLIP") {
+      hideLoader();
       alert("รายการนี้ไม่ได้อยู่ในสถานะที่ปฏิเสธได้แล้ว");
       doneAndExit();
-      return false;
-    }
-    return true;
-  }
-
-  function renderViewRemark_(claim, requesterPerson) {
-    const remark = String(claim.remark || "").trim() || "-";
-    const reqNo = shortReqLabel_(claim);
-    const note = String(claim.note || "").trim();
-
-    const lineName = String(claim.name || "-");
-    const fullNameNick = formatFullNameNick_(requesterPerson?.fullName, requesterPerson?.nickname);
-
-    const noteRowHtml = note
-      ? kvRow_("Note", escapeHtml_(note))
-      : "";
-
-    $("title").textContent = "Remark Details 💬";
-
-    $("rootBox").innerHTML = `
-      <div class="card mb-5 text-center pt-6 pb-5">
-         <div class="w-16 h-16 rounded-full bg-[#FFF0F2] flex items-center justify-center text-[#F43F5E] text-3xl mx-auto mb-3 shadow-inner">💬</div>
-         <div class="font-bold text-[#1F2937] text-lg">รายการถูกปฏิเสธ</div>
-         <div class="text-xs text-[#9CA3AF] mt-1 font-mono">Req No. ${escapeHtml_(reqNo)}</div>
-      </div>
-
-      <div class="card mb-5">
-        <div class="space-y-3 px-1">
-          ${kvRow_("Line", escapeHtml_(lineName))}
-          ${kvRow_("Name", escapeHtml_(fullNameNick))}
-          ${kvRow_("Amount", escapeHtml_(formatAmountTHB_(claim.amount)))}
-          ${noteRowHtml}
-        </div>
-      </div>
-
-      <div class="bg-[#FFF5F5] border border-[#FEE2E2] rounded-xl p-4 mb-6">
-        <div class="text-xs font-bold text-[#BE123C] mb-2">Rejection reason:</div>
-        <div class="text-sm text-[#9F1239] whitespace-pre-wrap leading-relaxed">${escapeHtml_(remark)}</div>
-      </div>
-
-      <button class="w-full bg-[#60A5FA] hover:bg-[#3B82F6] text-white py-4 rounded-2xl font-bold text-md transition-all shadow-lg shadow-blue-200 active:scale-[0.98]" onclick="doneAndExit()">ปิดหน้าต่าง</button>
-    `;
-  }
-
-  function renderReject_(claim, requesterPerson) {
-    const reqNo = shortReqLabel_(claim);
-    const attUrl = claim.requestAttachmentUrl ? String(claim.requestAttachmentUrl).trim() : "";
-    const attachHtml = attUrl
-      ? `<a href="${escapeAttr_(attUrl)}" target="_blank" class="text-[#2563EB] underline decoration-[#2563EB]">คลิกเพื่อดูไฟล์</a>`
-      : `—`;
-
-    const slipUrl = claim.transferSlipUrl ? String(claim.transferSlipUrl).trim() : "";
-    const slipHtml = slipUrl
-      ? `<a href="${escapeAttr_(slipUrl)}" target="_blank" class="text-[#2563EB] underline decoration-[#2563EB]">คลิกเพื่อดูสลิป</a>`
-      : `—`;
-
-    const lineName = String(claim.name || "-");
-    const fullNameNick = formatFullNameNick_(requesterPerson?.fullName, requesterPerson?.nickname);
-    const status = String(claim.status || "").toUpperCase();
-    const note = String(claim.note || "").trim();
-
-    const noteRowHtml = note
-      ? kvRow_("Note", escapeHtml_(note))
-      : "";
-
-    $("title").textContent = "Reject Claim ❌";
-
-    $("rootBox").innerHTML = `
-      <div class="card mb-5">
-        <div class="text-center mb-4">
-          <div class="text-4xl mb-2">📥</div>
-          <div class="font-bold text-lg text-[#1F2937]">${status === "WAITING_PAYMENT_SLIP" ? "Waiting for Decision" : "Pending Approval"}</div>
-          <div class="text-xs font-bold text-[#FBBF24] mt-1">${status === "WAITING_PAYMENT_SLIP" ? "รอตัดสินใจ" : "รออนุมัติ"}</div>
-        </div>
-        <hr class="border-[#F3F4F6] mb-4" />
-        <div class="space-y-3 px-1">
-          ${kvRow_("Req No.", `<span class="font-mono">${escapeHtml_(reqNo)}</span>`)}
-          ${kvRow_("Line", escapeHtml_(lineName))}
-          ${kvRow_("Name", escapeHtml_(fullNameNick))}
-          ${kvRow_("Company", escapeHtml_(claim.company || "-"))}
-          ${kvRow_("Amount", escapeHtml_(formatAmountTHB_(claim.amount)))}
-          ${noteRowHtml}
-          ${kvRow_("Attach", attachHtml)}
-          ${status === "WAITING_PAYMENT_SLIP" ? kvRow_("Slip", slipHtml) : ""}
-        </div>
-      </div>
-
-      <div class="space-y-2 mb-6 ml-1">
-        <label class="block text-sm font-bold text-[#1F2937]">Rejection reason <span class="text-[#EF4444]">*</span></label>
-        <textarea id="rejectRemark" rows="3" class="input resize-none" placeholder="Please provide a reason for rejection"></textarea>
-
-        <div id="remarkErr" class="hidden text-xs text-[#EF4444] mt-1.5 flex items-center font-bold">
-          <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
-          กรุณากรอกเหตุผลที่ไม่อนุมัติ
-        </div>
-      </div>
-
-      <div class="space-y-3">
-        <button id="submitBtn" class="w-full bg-[#F87171] hover:bg-[#EF4444] text-white py-4 rounded-2xl font-bold text-md transition-all shadow-lg shadow-red-200 active:scale-[0.98]"
-          onclick="submitReject_('${escapeAttr_(claim.requestId)}', '${escapeAttr_(claim.shortRequestId || "")}')">ยืนยัน</button>
-      </div>`;
-  }
-
-  async function submitReject_(requestId, shortRequestId) {
-    const ta = document.getElementById("rejectRemark");
-    const err = document.getElementById("remarkErr");
-    const btn = document.getElementById("submitBtn");
-    const remark = (ta?.value || "").trim();
-
-    if (!remark) {
-      err?.classList.remove("hidden");
-      ta?.classList.add("err");
-      ta.addEventListener('input', function() {
-        err?.classList.add("hidden");
-        ta?.classList.remove("err");
-      }, { once: true });
       return;
     }
 
-    try {
-      showLoader("Rejecting...");
-      if (btn) btn.disabled = true;
+    const data = await postForm({
+      action:       "reject_claim",
+      requestId,
+      actorUserId:  userProfile.userId,
+      remark
+    });
 
-      const profile = await liff.getProfile();
-
-      const latest = await apiGetClaimFresh_(requestId);
-      const st = String(latest?.claim?.status || "").toUpperCase();
-      if (!(st === "SUBMITTED" || st === "WAITING_PAYMENT_SLIP")) {
-        hideLoader();
-        alert("รายการนี้ไม่ได้อยู่ในสถานะที่ปฏิเสธได้แล้ว");
-        doneAndExit();
-        return;
-      }
-
-      const data = await postFormUrlEncoded_({
-        action: "reject_claim",
-        requestId,
-        actorUserId: profile.userId,
-        remark
-      });
-
-      if (!data || !data.ok) {
-        hideLoader();
-        if (btn) btn.disabled = false;
-
-        const errCode = String(data?.error || "unknown_error");
-
-        if (errCode === "not_onboarded") {
-          alert("Please complete your registration before using this flow.");
-          doneAndExit();
-          return;
-        }
-        if (errCode === "not_authorized") {
-          alert("คุณไม่มีสิทธิ์ปฏิเสธรายการนี้ค่ะ");
-          doneAndExit();
-          return;
-        }
-        if (errCode === "invalid_status") {
-          alert("รายการนี้ไม่ได้อยู่ในสถานะที่ปฏิเสธได้แล้ว");
-          doneAndExit();
-          return;
-        }
-
-        alert("❌ ไม่สามารถทำรายการได้: " + errCode);
-        return;
-      }
-
-      const notifyText = shortRequestId
-        ? `ปฏิเสธรายการแล้ว #${shortRequestId}`
-        : `CLAIM_REJECTED:${requestId}`;
-
-      await liff.sendMessages([{ type: "text", text: notifyText }]);
-
-      hideLoader();
-      $("rootBox").innerHTML = `
-        <div class="card text-center py-12 mt-10 border border-[#10B981] shadow-lg shadow-green-100">
-          <div class="w-20 h-20 rounded-full bg-[#ECFDF5] flex items-center justify-center text-[#10B981] text-4xl mx-auto mb-4 animate-bounce">✅</div>
-          <div class="text-xl font-bold text-[#1F2937]">Request rejected.</div>
-        </div>
-      `;
-      setTimeout(() => doneAndExit(), 1200);
-
-    } catch (e) {
+    if (!data?.ok) {
       hideLoader();
       if (btn) btn.disabled = false;
-      alert("❌ ไม่สามารถทำรายการได้: " + (e?.message || e));
-    }
-  }
 
-  async function init() {
-    showLoader("Loading...");
-
-    await liff.init({ liffId: LIFF_ID });
-    if (!liff.isLoggedIn()) { liff.login(); return; }
-
-    const params = new URLSearchParams(location.search);
-    const mode = params.get("mode");
-    const requestId = params.get("requestId");
-    if (!mode || !requestId) { hideLoader(); renderNotFound_(); return; }
-
-    let profile = null;
-    try { profile = await liff.getProfile(); } catch(e) {}
-
-    if (profile) {
-      $("subTitle").innerHTML = `Hi, <span class="font-bold text-[#1F2937]">${escapeHtml_(profile.displayName || "")}</span>`;
-      if (profile.pictureUrl) {
-        $("profileImg").src = profile.pictureUrl;
-        $("avatarBox").classList.remove("hidden");
+      const code = String(data?.error || "unknown_error");
+      if (code === "not_onboarded")  { alert("Please complete your registration."); doneAndExit(); return; }
+      if (code === "not_authorized") { alert("คุณไม่มีสิทธิ์ปฏิเสธรายการนี้ค่ะ"); doneAndExit(); return; }
+      if (code === "invalid_status") { alert("รายการนี้ไม่ได้อยู่ในสถานะที่ปฏิเสธได้แล้ว"); doneAndExit(); return; }
+      if (code === "missing_remark" || code === "remark_too_long") {
+        alert("กรุณากรอกเหตุผลให้ถูกต้องค่ะ");
+        return;
       }
-    }
-
-    const data = await apiGetClaimBundle_(requestId);
-    if (!data || !data.ok || !data.claim) { hideLoader(); renderNotFound_(); return; }
-
-    const claim = data.claim;
-    const requesterPerson = data.requesterPerson || {};
-
-    if (mode === "view_remark") {
-      hideLoader();
-      renderViewRemark_(claim, requesterPerson);
+      alert("❌ ไม่สามารถทำรายการได้: " + code);
       return;
     }
 
-    if (mode === "reject") {
-      if (!guardRejectStatus_(claim)) { hideLoader(); return; }
-      hideLoader();
-      renderReject_(claim, requesterPerson);
-      return;
-    }
+    // Notify chat
+    const notifyText = shortRequestId
+      ? "ปฏิเสธรายการแล้ว #" + shortRequestId
+      : "CLAIM_REJECTED:" + requestId;
+    try { await liff.sendMessages([{ type: "text", text: notifyText }]); } catch (_) {}
 
     hideLoader();
-    renderNotFound_();
+    $id("rootBox").innerHTML = `
+      <div class="card text-center py-12 mt-10 border border-[#10B981] shadow-lg shadow-green-100">
+        <div class="w-20 h-20 rounded-full bg-[#ECFDF5] flex items-center justify-center text-4xl mx-auto mb-4 animate-bounce">✅</div>
+        <div class="text-xl font-bold text-[#1F2937]">Request rejected.</div>
+      </div>`;
+
+    setTimeout(doneAndExit, 1200);
+
+  } catch (err) {
+    hideLoader();
+    if (btn) btn.disabled = false;
+    alert("❌ ไม่สามารถทำรายการได้: " + (err?.message || err));
+  }
+}
+
+/* ── Init ────────────────────────────────────────── */
+async function init() {
+  showLoader("Loading...");
+
+  await liff.init({ liffId: LIFF_ID });
+  if (!liff.isLoggedIn()) { liff.login(); return; }
+
+  const params    = new URLSearchParams(location.search);
+  const mode      = params.get("mode");
+  const requestId = params.get("requestId");
+
+  if (!mode || !requestId) { hideLoader(); renderNotFound(); return; }
+
+  // Fix #5: fetch profile once; use same object for all subsequent operations
+  userProfile = await liff.getProfile();
+
+  $id("subTitle").innerHTML =
+    `Hi, <span class="font-bold text-[#1F2937]">${esc(userProfile.displayName || "")}</span>`;
+  if (userProfile.pictureUrl) {
+    $id("profileImg").src = userProfile.pictureUrl;
+    $id("avatarBox").classList.remove("hidden");
   }
 
-  init().catch(err => {
-    console.error(err);
+  let data;
+  try {
+    data = await apiGetClaimBundle(requestId, userProfile.userId);
+  } catch (_) {
+    hideLoader(); renderSystemError("ไม่สามารถเชื่อมต่อระบบได้"); return;
+  }
+
+  if (!data?.ok || !data.claim) {
     hideLoader();
-    renderSystemError_("LIFF Init Error: " + (err?.message || err));
-  });
+    String(data?.error || "") === "not_authorized"
+      ? renderSystemError("คุณไม่มีสิทธิ์ดูรายการนี้")
+      : renderNotFound();
+    return;
+  }
+
+  const { claim, requesterPerson = {} } = data;
+
+  if (mode === "view_remark") {
+    hideLoader();
+    renderViewRemark(claim, requesterPerson);
+    return;
+  }
+
+  if (mode === "reject") {
+    const st = String(claim?.status || "").toUpperCase();
+    if (st !== "SUBMITTED" && st !== "WAITING_PAYMENT_SLIP") {
+      hideLoader();
+      alert("รายการนี้ไม่ได้อยู่ในสถานะที่ปฏิเสธได้แล้ว");
+      doneAndExit();
+      return;
+    }
+    hideLoader();
+    renderReject(claim, requesterPerson);
+    return;
+  }
+
+  hideLoader();
+  renderNotFound();
+}
+
+init().catch(err => {
+  console.error(err);
+  hideLoader();
+  renderSystemError("LIFF Init Error: " + (err?.message || err));
+});
 </script>
 </body>
 </html>
-
-
