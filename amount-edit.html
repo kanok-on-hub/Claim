@@ -12,53 +12,57 @@
   <style>
     body { font-family: 'Plus Jakarta Sans', sans-serif; background:#F3F4F6; color:#1F2937; -webkit-tap-highlight-color: transparent; }
     .card { background:#fff; border-radius:1.25rem; border:1px solid #E5E7EB; box-shadow:0 4px 6px -1px rgba(0,0,0,.05); padding:1.1rem; }
-    .input { background:#F9FAFB; border:1px solid #D1D5DB; border-radius:.9rem; padding:.85rem; width:100%; outline:none; transition:.2s; font-size:.95rem; color:#374151; }
+    .input { background:#F9FAFB; border:1px solid #D1D5DB; border-radius:.9rem; padding:.85rem; width:100%; outline:none; transition:.2s; font-size:.95rem; color:#374151; box-sizing:border-box; }
     .input:focus { background:#fff; border-color:#3B82F6; box-shadow:0 0 0 3px rgba(59,130,246,.15); }
-    .input.err { border-color:#EF4444 !important; background-color:#FEF2F2 !important; box-shadow:0 0 0 3px rgba(239,68,68,.15) !important; }
-    .textarea { background:#F9FAFB; border:1px solid #D1D5DB; border-radius:.9rem; padding:.85rem; width:100%; outline:none; transition:.2s; font-size:.95rem; color:#374151; resize:none; min-height:110px; line-height:1.5; }
+    .input.err { border-color:#EF4444 !important; background:#FEF2F2 !important; box-shadow:0 0 0 3px rgba(239,68,68,.15) !important; }
+    .textarea { background:#F9FAFB; border:1px solid #D1D5DB; border-radius:.9rem; padding:.85rem; width:100%; outline:none; transition:.2s; font-size:.95rem; color:#374151; resize:none; min-height:110px; line-height:1.5; box-sizing:border-box; }
     .textarea:focus { background:#fff; border-color:#3B82F6; box-shadow:0 0 0 3px rgba(59,130,246,.15); }
-    .info-badge { font-size:11px; font-weight:700; background:#EFF6FF; color:#2563EB; padding:4px 12px; border-radius:9999px; border:1px solid #DBEAFE; display:inline-flex; align-items:center; white-space:nowrap; }
-    .btn-primary { width:100%; background:#60A5FA; color:#fff; padding:1rem; border-radius:1rem; font-weight:700; font-size:1.1rem; box-shadow:0 10px 15px -3px rgba(96,165,250,.3); transition:all .15s; }
-    .btn-primary:hover  { background:#3B82F6; }
-    .btn-primary:active { transform:scale(.98); }
-    .btn-primary:disabled { opacity:.55; cursor:not-allowed; }
-    .btn-ghost { width:100%; background:#fff; border:1px solid #E5E7EB; color:#9CA3AF; padding:.75rem; border-radius:1rem; font-weight:700; transition:colors .15s; }
-    .btn-ghost:hover { background:#F9FAFB; }
+    .info-badge { font-size:11px; font-weight:700; background:#EFF6FF; color:#2563EB; padding:4px 12px; border-radius:9999px; border:1px solid #DBEAFE; display:inline-flex; align-items:center; }
+    .btn-blue { display:block; width:100%; background:#60A5FA; color:#fff; padding:1rem; border-radius:1rem; font-weight:700; font-size:1rem; border:none; cursor:pointer; transition:background .15s; }
+    .btn-blue:hover { background:#3B82F6; }
+    .btn-blue:active { opacity:.9; }
+    .btn-blue:disabled { opacity:.5; cursor:not-allowed; }
+    .btn-ghost { display:block; width:100%; background:#fff; border:1px solid #E5E7EB; color:#9CA3AF; padding:.75rem; border-radius:1rem; font-weight:700; cursor:pointer; margin-top:.75rem; }
+    .err-msg { font-size:.78rem; color:#DC2626; font-weight:600; margin-top:.4rem; padding:.4rem .6rem; background:#FEF2F2; border-radius:.5rem; }
     ::-webkit-scrollbar { display:none; }
   </style>
 </head>
 
 <body class="pb-32 antialiased">
-<div class="max-w-md mx-auto min-h-screen flex flex-col relative">
+<div class="max-w-md mx-auto min-h-screen flex flex-col">
 
   <!-- Header -->
-  <div class="bg-white px-6 pt-10 pb-4 rounded-b-3xl shadow-sm mb-4 relative z-10 border-b border-slate-100">
+  <div class="bg-white px-6 pt-10 pb-4 rounded-b-3xl shadow-sm mb-4 border-b border-slate-100">
     <div class="flex items-center gap-4">
-      <div id="avatarBox" class="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-md ring-2 ring-blue-50 hidden">
-        <img id="profileImg" src="" class="w-full h-full object-cover" alt="profile">
+      <div id="avatarBox" class="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow ring-2 ring-blue-50 hidden">
+        <img id="profileImg" src="" class="w-full h-full object-cover" alt="">
       </div>
       <div>
-        <h1 id="title" class="text-2xl font-bold text-[#1F2937] tracking-tight">Edit Details ✏️</h1>
-        <p id="userGreet" class="text-[#9CA3AF] text-sm font-medium mt-0.5 flex items-center gap-1">
-          <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Loading...
+        <h1 id="pageTitle" class="text-2xl font-bold text-gray-800 tracking-tight">Edit Details</h1>
+        <p class="text-gray-400 text-sm font-medium mt-0.5 flex items-center gap-1">
+          <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse inline-block"></span>
+          <span id="greetText">Loading...</span>
         </p>
       </div>
     </div>
   </div>
 
   <!-- Content -->
-  <div class="px-5 space-y-6 flex-1" id="rootBox"></div>
+  <div class="px-5 space-y-5 flex-1" id="rootBox"></div>
 
   <!-- Bottom bar -->
-  <div class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-[#F3F4F6] p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] z-40 hidden" id="bottomBar">
-    <button id="submitBtn" class="btn-primary">บันทึกการแก้ไข</button>
+  <div id="bottomBar"
+       class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gray-100
+              px-5 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))] z-40 hidden">
+    <button id="submitBtn" class="btn-blue">บันทึกการแก้ไข</button>
   </div>
 
-  <!-- Loader -->
-  <div id="loader" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden items-center justify-center z-50">
-    <div class="bg-white p-6 rounded-2xl shadow-xl flex flex-col items-center max-w-[180px] w-full">
-      <div class="w-10 h-10 border-4 border-[#F3F4F6] border-t-[#3B82F6] rounded-full animate-spin mb-4"></div>
-      <div class="font-bold text-[#1F2937] text-sm" id="loaderText">Processing...</div>
+  <!-- Loader overlay -->
+  <div id="loader"
+       class="fixed inset-0 bg-black/30 backdrop-blur-sm hidden items-center justify-center z-50">
+    <div class="bg-white p-6 rounded-2xl shadow-xl flex flex-col items-center w-44">
+      <div class="w-10 h-10 border-4 border-gray-100 border-t-blue-400 rounded-full animate-spin mb-3"></div>
+      <div id="loaderText" class="font-bold text-gray-700 text-sm text-center">Loading...</div>
     </div>
   </div>
 
@@ -67,348 +71,425 @@
 <script>
 "use strict";
 
-/* ── Config ──────────────────────────────────────── */
-const LIFF_ID = "2008997153-opOWuU0Y";
-const API_URL = "https://script.google.com/macros/s/AKfycbzjatOY93-6QIVPdBSxJyzQhMw9DfqwlgFVdvEanLpZgNZ_1ACwyrUKMGvgnCArwSzWHQ/exec";
+/* ============================================================
+   CONFIG -- แก้ค่าทั้งสองนี้ให้ตรงกับโปรเจกต์ของคุณ
+   ============================================================ */
+var LIFF_ID = "2008997153-opOWuU0Y";
+var API_URL = "https://script.google.com/macros/s/AKfycbzjatOY93-6QIVPdBSxJyzQhMw9DfqwlgFVdvEanLpZgNZ_1ACwyrUKMGvgnCArwSzWHQ/exec";
 
-/* ── State ───────────────────────────────────────── */
-let userProfile = null;
-let claimData   = null;
-let requestId   = "";
+/* ============================================================
+   STATE
+   ============================================================ */
+var userProfile = null;
+var claimData   = null;
+var requestId   = "";
 
-/* ── DOM refs (resolved once after DOMContentLoaded) ── */
-const $id = (id) => document.getElementById(id);
+/* ============================================================
+   UTILS
+   ============================================================ */
+function $id(id) { return document.getElementById(id); }
 
-/* ── Loader ──────────────────────────────────────── */
 function showLoader(msg) {
-  $id("loaderText").textContent = msg || "Processing...";
-  $id("loader").classList.replace("hidden", "flex");
+  $id("loaderText").textContent = msg || "Loading...";
+  $id("loader").style.display = "flex";
 }
 function hideLoader() {
-  $id("loader").classList.replace("flex", "hidden");
+  $id("loader").style.display = "none";
 }
 
-/* ── Escape helpers ──────────────────────────────── */
+function doneAndExit() {
+  try { if (liff && liff.isInClient && liff.isInClient()) { liff.closeWindow(); return; } } catch (e) {}
+  try { window.close(); } catch (e) {}
+}
+
+/* Safe HTML escape */
 function esc(s) {
-  return String(s ?? "")
+  return String(s == null ? "" : s)
     .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 }
 
-/* ── Close ───────────────────────────────────────── */
-function doneAndExit() {
-  try { if (liff.isInClient()) { liff.closeWindow(); return; } } catch (_) {}
-  try { window.close(); } catch (_) {}
+function formatTHB(v) {
+  var n = parseFloat(v) || 0;
+  return n.toLocaleString("en-US", { minimumFractionDigits:2, maximumFractionDigits:2 }) + " บาท";
 }
 
-/* ── Header helpers ──────────────────────────────── */
-function setHeader(title, subtitleHtml) {
-  if (title)       $id("title").textContent = title;
-  if (subtitleHtml) $id("userGreet").innerHTML = subtitleHtml;
+function reqNo(claim) {
+  var s = String((claim && claim.shortRequestId) || "").trim();
+  if (s) return "#" + s;
+  var r = String((claim && claim.requestId) || "").trim();
+  return r ? "#" + (r.length <= 8 ? r : r.slice(-8)) : "-";
 }
 
-/* ── Submit button state ─────────────────────────── */
-function setBtnDisabled(disabled) {
-  $id("submitBtn").disabled = !!disabled;
-}
-
-/* ── KV row ──────────────────────────────────────── */
-function kvRow(label, valueHtml) {
-  return `
-    <div class="flex items-baseline space-x-3">
-      <span class="text-[#9CA3AF] text-xs w-20 flex-shrink-0">${esc(label)}</span>
-      <span class="font-bold text-[#1F2937] text-sm break-words flex-1 whitespace-pre-wrap">${valueHtml}</span>
-    </div>`;
-}
-
-/* ── Formatting ──────────────────────────────────── */
-function formatAmountTHB(v) {
-  const n = Number(v || 0);
-  if (isNaN(n)) return "-";
-  return n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " บาท";
-}
-
-function formatReqNo(claim) {
-  const shortId = String(claim?.shortRequestId || "").trim();
-  if (shortId) return "#" + shortId;
-  const reqId = String(claim?.requestId || "").trim();
-  if (!reqId) return "-";
-  return "#" + (reqId.length <= 8 ? reqId : reqId.slice(-8));
-}
-
-function parseAmountClient(raw) {
-  let s = String(raw || "").trim()
-    .replace(/บาท/gi, "").replace(/,/g, "").replace(/\s+/g, "");
+function parseAmt(raw) {
+  var s = String(raw || "").trim()
+    .replace(/บาท/gi,"").replace(/,/g,"").replace(/\s+/g,"");
   if (!/^\d+(\.\d{1,2})?$/.test(s)) return { ok: false };
-  const amount = Number(s);
-  if (isNaN(amount) || amount <= 0 || amount > 99_999_999) return { ok: false };
-  return { ok: true, amount, normalized: s };
+  var n = Number(s);
+  if (!n || n <= 0 || n > 99999999) return { ok: false };
+  return { ok:true, amount:n, normalized:s };
 }
 
-function normalizeNoteClient(raw) {
-  return String(raw ?? "").replace(/\r\n/g, "\n").replace(/\r/g, "\n").trim();
+function normalizeNote(raw) {
+  return String(raw == null ? "" : raw)
+    .replace(/\r\n/g,"\n").replace(/\r/g,"\n").trim();
 }
 
-/* ── Amount field validation ─────────────────────── */
-function clearAmountErr() {
-  $id("amountInput").classList.remove("err");
-  $id("amountErr").classList.add("hidden");
-}
-function showAmountErr(msg) {
-  $id("amountInput").classList.add("err");
-  $id("amountErr").textContent = msg;
-  $id("amountErr").classList.remove("hidden");
-}
-
-/* ── Error screens ───────────────────────────────── */
-function renderSystemError(msg) {
-  setHeader("System Error", "Please try again");
+/* ============================================================
+   GENERIC SCREENS
+   ============================================================ */
+function renderScreen(icon, title, body, primaryLabel, primaryAction, showClose) {
+  $id("pageTitle").textContent = title;
   $id("bottomBar").classList.add("hidden");
-  $id("rootBox").innerHTML = `
-    <div class="card text-center py-10 mt-6">
-      <div class="text-4xl mb-3">⚠️</div>
-      <div class="text-lg font-bold text-[#1F2937]">System Error</div>
-      <div class="text-sm text-[#9CA3AF] mt-2">${esc(msg || "ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองใหม่อีกครั้ง")}</div>
-      <button class="btn-primary mt-6" onclick="location.reload()">Try Again</button>
-      <button class="btn-ghost mt-3"   onclick="doneAndExit()">Close</button>
-    </div>`;
+
+  var primaryBtn = primaryLabel
+    ? '<button class="btn-blue mt-6" onclick="' + primaryAction + '">' + esc(primaryLabel) + "</button>"
+    : "";
+  var closeBtn = showClose !== false
+    ? '<button class="btn-ghost" onclick="doneAndExit()">ปิดหน้าต่าง</button>'
+    : "";
+
+  $id("rootBox").innerHTML =
+    '<div class="card text-center py-10 mt-2">' +
+      '<div class="text-5xl mb-4">' + icon + "</div>" +
+      '<div class="text-lg font-bold text-gray-800">' + esc(title) + "</div>" +
+      '<div class="text-sm text-gray-400 mt-2 leading-relaxed px-2 whitespace-pre-line">' + esc(body) + "</div>" +
+      primaryBtn +
+      closeBtn +
+    "</div>";
 }
 
+function renderSystemError(msg, detail) {
+  var full = msg + (detail ? "\n\nรายละเอียด:\n" + detail : "");
+  renderScreen("⚠️", "เกิดข้อผิดพลาด", full, "ลองใหม่", "location.reload()");
+}
 function renderNotFound() {
-  setHeader("Not Found", "Error");
-  $id("bottomBar").classList.add("hidden");
-  $id("rootBox").innerHTML = `
-    <div class="card text-center py-10 mt-6">
-      <div class="text-4xl mb-3">📄❓</div>
-      <div class="text-lg font-bold text-[#1F2937]">ไม่พบรายการเบิกเงินค่ะ</div>
-      <div class="text-sm text-[#9CA3AF] mt-2">โปรดตรวจสอบลิงก์อีกครั้ง</div>
-      <button class="btn-primary mt-6" onclick="doneAndExit()">ปิดหน้าต่าง</button>
-    </div>`;
+  renderScreen("🔍", "ไม่พบรายการ", "ไม่พบรายการเบิกเงินนี้ในระบบ\nกรุณาตรวจสอบลิงก์อีกครั้ง");
 }
-
 function renderForbidden(msg) {
-  setHeader("Not Allowed", "Action not permitted");
-  $id("bottomBar").classList.add("hidden");
-  $id("rootBox").innerHTML = `
-    <div class="card text-center py-10 mt-6">
-      <div class="text-4xl mb-3">⛔</div>
-      <div class="text-lg font-bold text-[#1F2937]">ไม่สามารถแก้ไขรายละเอียดได้</div>
-      <div class="text-sm text-[#9CA3AF] mt-2">${esc(msg || "รายการนี้ไม่อยู่ในสถานะ Draft หรือไม่ใช่ของคุณ")}</div>
-      <button class="btn-primary mt-6" onclick="doneAndExit()">ปิดหน้าต่าง</button>
-    </div>`;
+  renderScreen("⛔", "ไม่มีสิทธิ์", msg || "รายการนี้ไม่ใช่ของคุณหรือไม่อยู่ในสถานะ Draft");
 }
 
-/* ── Main form ───────────────────────────────────── */
+/* ============================================================
+   AMOUNT FIELD ERROR
+   ============================================================ */
+function clearAmtErr() {
+  var i = $id("amountInput"); if (i) i.classList.remove("err");
+  var e = $id("amountErr");   if (e) { e.textContent=""; e.classList.add("hidden"); }
+}
+function showAmtErr(msg) {
+  var i = $id("amountInput"); if (i) i.classList.add("err");
+  var e = $id("amountErr");
+  if (e) { e.textContent = msg; e.classList.remove("hidden"); }
+}
+
+/* ============================================================
+   MAIN FORM
+   ============================================================ */
 function renderForm(claim) {
-  const reqNo  = formatReqNo(claim);
-  const status = String(claim.status || "").toUpperCase();
-  const note   = String(claim.note || "");
-  const noteDisplay = note ? esc(note) : "—";
+  var n     = parseFloat(claim.amount) || 0;
+  var amtV  = n === Math.floor(n) ? String(Math.floor(n)) : n.toFixed(2);
+  var note  = String(claim.note || "");
+  var st    = String(claim.status || "").toUpperCase();
 
-  setHeader("Edit Details ✏️",
-    `Hi, <span class="font-bold text-[#1F2937]">${esc(userProfile?.displayName || "")}</span>`);
+  $id("pageTitle").textContent = "Edit Details";
+  $id("greetText").innerHTML =
+    'Hi, <strong class="text-gray-800">' +
+    esc((userProfile && userProfile.displayName) || "") + "</strong>";
 
-  $id("rootBox").innerHTML = `
-    <div class="card space-y-3">
-      <div class="flex justify-between items-center px-1 h-7">
-        <label class="text-sm font-bold text-[#1F2937]">Expense Claim Info</label>
-        <span class="info-badge">${esc(status || "DRAFT")}</span>
-      </div>
-      <div class="space-y-3 px-1 mt-2">
-        ${kvRow("Req No.", `<span class="font-mono">${esc(reqNo)}</span>`)}
-        ${kvRow("Company", esc(claim.company || "-"))}
-        ${kvRow("Amount",  esc(formatAmountTHB(claim.amount)))}
-        ${kvRow("Note",    noteDisplay)}
-      </div>
-    </div>
+  $id("rootBox").innerHTML =
+    /* Info card */
+    '<div class="card space-y-3">' +
+      '<div class="flex justify-between items-center">' +
+        '<span class="text-sm font-bold text-gray-800">Expense Claim</span>' +
+        '<span class="info-badge">' + esc(st || "DRAFT") + "</span>" +
+      "</div>" +
+      '<div class="space-y-2">' +
+        kv("Req No.", '<span class="font-mono">' + esc(reqNo(claim)) + "</span>") +
+        kv("Company", esc(claim.company || "-")) +
+        kv("Amount",  esc(formatTHB(claim.amount))) +
+        kv("Note",    note ? esc(note) : '<span class="text-gray-300">-</span>') +
+      "</div>" +
+    "</div>" +
+    /* Edit card */
+    '<div class="card space-y-4">' +
+      "<div>" +
+        '<label class="text-sm font-bold text-gray-800 block mb-2">' +
+          'จำนวนเงิน (บาท) <span class="text-red-500">*</span>' +
+        "</label>" +
+        '<input id="amountInput" type="text" inputmode="decimal" class="input"' +
+          ' placeholder="เช่น 1200 หรือ 1200.50" value="' + esc(amtV) + '">' +
+        '<div id="amountErr" class="hidden err-msg"></div>' +
+      "</div>" +
+      "<div>" +
+        '<label class="text-sm font-bold text-gray-800 block mb-2">' +
+          'หมายเหตุ <span class="text-gray-400 font-normal text-xs">(ถ้ามี)</span>' +
+        "</label>" +
+        '<textarea id="noteInput" class="textarea" placeholder="รายละเอียดเพิ่มเติม..." maxlength="500">' +
+          esc(note) +
+        "</textarea>" +
+        '<div class="text-right text-xs text-gray-300 mt-1">' +
+          '<span id="noteCount">' + note.length + "</span>/500" +
+        "</div>" +
+      "</div>" +
+      '<div class="bg-blue-50 rounded-xl px-3 py-2 text-xs text-blue-500 font-medium">' +
+        "แก้ไขได้เฉพาะรายการสถานะ Draft เท่านั้น" +
+      "</div>" +
+    "</div>";
 
-    <div class="card space-y-4">
-      <div>
-        <label class="text-sm font-bold text-[#1F2937] block mb-2 ml-1">
-          New Amount <span class="text-[#EF4444]">*</span>
-        </label>
-        <input id="amountInput" type="text" inputmode="decimal" class="input font-bold text-[#1F2937]"
-               placeholder="เช่น 1200 หรือ 1,200.50"
-               value="${esc(String(Number(claim.amount || 0) || ""))}">
-        <div id="amountErr" class="hidden text-xs text-[#EF4444] mt-2 font-bold ml-1"></div>
-      </div>
-
-      <div>
-        <label class="text-sm font-bold text-[#1F2937] block mb-2 ml-1">Note (optional)</label>
-        <textarea id="noteInput" class="textarea" placeholder="เพิ่มรายละเอียดเพิ่มเติม (ถ้ามี)" maxlength="500">${esc(note)}</textarea>
-      </div>
-
-      <div class="flex items-start gap-2 bg-[#F8FAFC] p-3 rounded-xl border border-[#F1F5F9]">
-        <span class="text-[#94A3B8] mt-0.5">ℹ️</span>
-        <div class="text-[11px] text-[#64748B] font-medium leading-relaxed">
-          สามารถแก้ไขรายละเอียดได้เฉพาะรายการที่อยู่ในสถานะ Draft เท่านั้น
-        </div>
-      </div>
-    </div>`;
-
-  // Event listeners (no inline onclick — Fix #13)
-  $id("amountInput").addEventListener("input", clearAmountErr);
-  $id("submitBtn").addEventListener("click", handleSubmit);
+  /* Events */
+  $id("amountInput").addEventListener("input", clearAmtErr);
+  $id("noteInput").addEventListener("input", function() {
+    var c = $id("noteCount"); if (c) c.textContent = (this.value || "").length;
+  });
+  $id("submitBtn").addEventListener("click", onSubmit);
 
   $id("bottomBar").classList.remove("hidden");
-  setBtnDisabled(false);
+  $id("submitBtn").disabled = false;
 }
 
-/* ── API calls ───────────────────────────────────── */
-async function apiGetClaim(rid, actorUserId) {
-  const res = await fetch(
-    API_URL + "?action=get_claim"
-    + "&requestId="  + encodeURIComponent(rid)
-    + "&actorUserId=" + encodeURIComponent(actorUserId)
-    + "&t=" + Date.now()
+function kv(label, html) {
+  return (
+    '<div class="flex items-baseline gap-3">' +
+      '<span class="text-gray-400 text-xs w-20 shrink-0">' + esc(label) + "</span>" +
+      '<span class="font-bold text-gray-800 text-sm flex-1 break-words">' + html + "</span>" +
+    "</div>"
   );
-  return res.json();
 }
 
-async function postForm(obj) {
-  const body = new URLSearchParams();
-  Object.keys(obj || {}).forEach(k => body.set(k, obj[k] == null ? "" : String(obj[k])));
-  const res = await fetch(API_URL, {
+/* ============================================================
+   API  -- fetchGAS handles GAS redirect + text/html responses
+   ============================================================
+   GAS Web App ทุก request จะถูก redirect 302 ก่อนเสมอ
+   fetch() จัดการ redirect อัตโนมัติ แต่ GAS อาจส่ง
+   Content-Type: text/html แม้ body จะเป็น JSON
+   วิธีแก้: อ่าน .text() แล้ว parse JSON เอง
+   ============================================================ */
+function fetchGAS(url, opts) {
+  return fetch(url, Object.assign({ redirect: "follow" }, opts || {}))
+    .then(function(res) {
+      return res.text();
+    })
+    .then(function(text) {
+      var t = (text || "").trim();
+      if (!t) throw new Error("Empty response from server");
+
+      /* GAS error page (HTML) */
+      if (t.charAt(0) === "<") {
+        /* Try to extract a useful message from the HTML */
+        var m = t.match(/<title>([^<]*)<\/title>/i);
+        var title = m ? m[1] : "GAS error page";
+        throw new Error("Server returned HTML instead of JSON. Possible causes: (1) Web App not deployed (2) Wrong API_URL (3) Script error. Title: " + title);
+      }
+
+      try {
+        return JSON.parse(t);
+      } catch (e) {
+        throw new Error("Cannot parse server response as JSON. First 300 chars: " + t.substring(0, 300));
+      }
+    });
+}
+
+function apiGet(requestIdVal, actorUserId) {
+  return fetchGAS(
+    API_URL +
+    "?action=get_claim" +
+    "&requestId="   + encodeURIComponent(requestIdVal) +
+    "&actorUserId=" + encodeURIComponent(actorUserId) +
+    "&t="           + Date.now()
+  );
+}
+
+function apiPost(obj) {
+  var parts = [];
+  Object.keys(obj || {}).forEach(function(k) {
+    parts.push(encodeURIComponent(k) + "=" + encodeURIComponent(obj[k] == null ? "" : String(obj[k])));
+  });
+  return fetchGAS(API_URL, {
     method:  "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
-    body:    body.toString()
+    body:    parts.join("&")
   });
-  return res.json();
 }
 
-/* ── Submit handler ──────────────────────────────── */
-async function handleSubmit() {
-  clearAmountErr();
+/* ============================================================
+   SUBMIT
+   ============================================================ */
+function onSubmit() {
+  clearAmtErr();
 
-  const rawAmount = ($id("amountInput")?.value || "").trim();
-  const parsed    = parseAmountClient(rawAmount);
+  var raw    = ($id("amountInput") && $id("amountInput").value || "").trim();
+  var parsed = parseAmt(raw);
   if (!parsed.ok) {
-    showAmountErr("กรุณาระบุจำนวนเงินให้ถูกต้อง (เช่น 1200.50, สูงสุด 99,999,999)");
+    showAmtErr("กรุณาระบุจำนวนเงินให้ถูกต้อง เช่น 1200 หรือ 1200.50 (สูงสุด 99,999,999)");
+    var inp = $id("amountInput"); if (inp) inp.focus();
     return;
   }
 
-  const note = normalizeNoteClient($id("noteInput")?.value || "");
-  if (note.length > 500) {
-    alert("Note ยาวเกิน 500 ตัวอักษร");
-    return;
-  }
+  var note = normalizeNote(($id("noteInput") && $id("noteInput").value) || "");
+  if (note.length > 500) { alert("หมายเหตุยาวเกิน 500 ตัวอักษร"); return; }
 
-  showLoader("Saving...");
-  setBtnDisabled(true);
+  showLoader("กำลังบันทึก...");
+  $id("submitBtn").disabled = true;
 
-  try {
-    const data = await postForm({
-      action:       "update_claim_details",
-      requestId,
-      actorUserId:  userProfile.userId,
-      amount:       parsed.normalized,
-      note
-    });
-
-    if (!data?.ok) {
+  apiPost({
+    action:      "update_claim_details",
+    requestId:   requestId,
+    actorUserId: userProfile.userId,
+    amount:      parsed.normalized,
+    note:        note
+  })
+  .then(function(data) {
+    if (!data || !data.ok) {
       hideLoader();
-      setBtnDisabled(false);
-      const code = String(data?.error || "unknown_error");
+      $id("submitBtn").disabled = false;
+      var code = String((data && data.error) || "unknown_error");
       if (code === "missing_amount" || code === "invalid_amount") {
-        showAmountErr("กรุณาระบุจำนวนเงินให้ถูกต้อง");
+        showAmtErr("จำนวนเงินไม่ถูกต้อง");
       } else if (code === "note_too_long") {
-        alert("Note ยาวเกินไปค่ะ (สูงสุด 500 ตัวอักษร)");
+        alert("หมายเหตุยาวเกินไป สูงสุด 500 ตัวอักษร");
       } else if (code === "not_owner") {
         renderForbidden("รายการนี้ไม่ใช่ของคุณ");
       } else if (code === "cannot_edit_non_draft") {
-        renderForbidden("แก้ไขรายละเอียดได้เฉพาะรายการที่อยู่ในสถานะ Draft");
+        renderForbidden("แก้ไขได้เฉพาะรายการสถานะ Draft เท่านั้น");
       } else if (code === "claim_not_found") {
         renderNotFound();
       } else {
-        alert("❌ Save failed: " + code);
+        renderSystemError("บันทึกไม่สำเร็จ", code);
       }
       return;
     }
 
-    // Send notify message to chat
-    const shortId = String(claimData?.shortRequestId || "").trim();
-    const notifyText = shortId
+    /* Notify LINE chat */
+    var shortId = String((claimData && claimData.shortRequestId) || "").trim();
+    var notify  = shortId
       ? "อัปเดตรายการแล้ว #" + shortId
       : "CLAIM_DRAFT_UPDATED:" + requestId;
-    try { await liff.sendMessages([{ type: "text", text: notifyText }]); } catch (_) {}
 
+    var msgPromise = (liff && liff.sendMessages)
+      ? liff.sendMessages([{ type: "text", text: notify }]).catch(function() {})
+      : Promise.resolve();
+
+    msgPromise.then(function() {
+      hideLoader();
+      $id("bottomBar").classList.add("hidden");
+      $id("rootBox").innerHTML =
+        '<div class="card text-center py-14 mt-8 border-2 border-green-200">' +
+          '<div class="text-6xl mb-4">&#9989;</div>' +
+          '<div class="text-xl font-bold text-gray-800">บันทึกสำเร็จ</div>' +
+          '<div class="text-sm text-gray-400 mt-2">กลับไปยืนยันรายการในแชท LINE</div>' +
+        "</div>";
+      setTimeout(doneAndExit, 1500);
+    });
+  })
+  .catch(function(err) {
     hideLoader();
-    $id("bottomBar").classList.add("hidden");
-
-    $id("rootBox").innerHTML = `
-      <div class="card text-center py-12 mt-10 border border-[#10B981] shadow-lg shadow-green-100">
-        <div class="w-20 h-20 rounded-full bg-[#ECFDF5] flex items-center justify-center text-[#10B981] text-4xl mx-auto mb-4 animate-bounce">✅</div>
-        <div class="text-xl font-bold text-[#1F2937]">Details updated.</div>
-        <div class="text-sm text-[#9CA3AF] mt-2">ยืนยันรายการต่อในแชท</div>
-      </div>`;
-
-    setTimeout(doneAndExit, 1200);
-
-  } catch (err) {
-    hideLoader();
-    setBtnDisabled(false);
-    alert("❌ Save failed: " + (err?.message || err));
-  }
+    $id("submitBtn").disabled = false;
+    renderSystemError("บันทึกไม่สำเร็จ กรุณาลองใหม่", (err && err.message) || String(err));
+  });
 }
 
-/* ── Init ────────────────────────────────────────── */
-async function init() {
-  showLoader("Loading...");
+/* ============================================================
+   INIT  -- promise chain (no async/await for wider compatibility)
+   ============================================================ */
+function init() {
+  showLoader("กำลังโหลด...");
 
-  await liff.init({ liffId: LIFF_ID });
-  if (!liff.isLoggedIn()) { liff.login(); return; }
+  liff.init({ liffId: LIFF_ID })
+    .then(function() {
 
-  const params = new URLSearchParams(location.search);
-  requestId = String(params.get("requestId") || "").trim();
-  if (!requestId) { hideLoader(); renderNotFound(); return; }
+      if (!liff.isLoggedIn()) {
+        liff.login({ redirectUri: location.href });
+        return Promise.reject("login_redirect");
+      }
 
-  userProfile = await liff.getProfile();
+      var params = new URLSearchParams(location.search);
+      requestId  = (params.get("requestId") || "").trim();
 
-  if (userProfile.pictureUrl) {
-    $id("profileImg").src = userProfile.pictureUrl;
-    $id("avatarBox").classList.remove("hidden");
-  }
-  setHeader("Edit Details ✏️",
-    `Hi, <span class="font-bold text-[#1F2937]">${esc(userProfile.displayName || "")}</span>`);
+      if (!requestId) {
+        hideLoader();
+        renderScreen("🔗", "URL ไม่ถูกต้อง",
+          "ไม่พบ requestId ใน URL\nกรุณาเปิดหน้านี้จากแชท LINE เท่านั้น");
+        return Promise.reject("no_requestId");
+      }
 
-  let data;
-  try {
-    data = await apiGetClaim(requestId, userProfile.userId);
-  } catch (_) {
-    hideLoader();
-    renderSystemError("ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองใหม่อีกครั้ง");
-    return;
-  }
+      return liff.getProfile();
+    })
+    .then(function(profile) {
+      userProfile = profile;
 
-  if (!data?.ok || !data.claim) {
-    hideLoader();
-    String(data?.error || "") === "claim_not_found"
-      ? renderNotFound()
-      : (String(data?.error || "") === "not_authorized"
-          ? renderForbidden("คุณไม่มีสิทธิ์ดูรายการนี้")
-          : renderSystemError("ไม่สามารถดึงข้อมูลรายการได้"));
-    return;
-  }
+      if (profile.pictureUrl) {
+        $id("profileImg").src = profile.pictureUrl;
+        $id("avatarBox").classList.remove("hidden");
+      }
+      $id("greetText").innerHTML =
+        'Hi, <strong class="text-gray-800">' + esc(profile.displayName || "") + "</strong>";
 
-  claimData = data.claim;
+      return apiGet(requestId, profile.userId);
+    })
+    .then(function(data) {
+      if (!data || !data.ok || !data.claim) {
+        hideLoader();
+        var code = String((data && data.error) || "");
+        if      (code === "claim_not_found")     renderNotFound();
+        else if (code === "not_authorized")      renderForbidden("คุณไม่มีสิทธิ์ดูรายการนี้");
+        else if (code === "missing_actorUserId") renderForbidden("ระบบไม่ได้รับ LINE userId กรุณาเปิดจาก LINE app");
+        else renderSystemError("โหลดข้อมูลไม่สำเร็จ", code || "no ok");
+        return;
+      }
 
-  // Ownership + status guard (double-checked on server, but guard here too for UX)
-  if (String(claimData.userId || "").trim() !== String(userProfile.userId || "").trim()) {
-    hideLoader(); renderForbidden("รายการนี้ไม่ใช่ของคุณ"); return;
-  }
-  if (String(claimData.status || "").toUpperCase() !== "DRAFT") {
-    hideLoader(); renderForbidden("แก้ไขรายละเอียดได้เฉพาะตอนรายการยังเป็น Draft"); return;
-  }
+      claimData = data.claim;
 
-  renderForm(claimData);
-  hideLoader();
+      /* Owner guard */
+      var ownerUid = String(claimData.userId || "").trim();
+      var myUid    = String((userProfile && userProfile.userId) || "").trim();
+      if (ownerUid && myUid && ownerUid !== myUid) {
+        hideLoader(); renderForbidden("รายการนี้ไม่ใช่ของคุณ"); return;
+      }
+
+      /* Status guard */
+      var st = String(claimData.status || "").toUpperCase();
+      if (st !== "DRAFT") {
+        hideLoader();
+        renderForbidden("แก้ไขได้เฉพาะรายการสถานะ Draft\nรายการนี้อยู่ในสถานะ: " + st);
+        return;
+      }
+
+      renderForm(claimData);
+      hideLoader();
+    })
+    .catch(function(err) {
+      /* "login_redirect" and "no_requestId" are expected early exits */
+      if (err === "login_redirect" || err === "no_requestId") return;
+
+      console.error("Init error:", err);
+      hideLoader();
+      var msg = (err && err.message) || String(err);
+
+      if (msg.indexOf("HTML instead of JSON") !== -1) {
+        renderSystemError(
+          "GAS ส่งข้อมูลผิดรูปแบบ",
+          "สาเหตุที่เป็นไปได้:\n" +
+          "1. API_URL ไม่ถูกต้อง\n" +
+          "2. ยังไม่ได้ Deploy Web App ใน GAS\n" +
+          "3. Script มี error -- ดู GAS Execution log\n\n" + msg
+        );
+      } else if (msg.indexOf("Cannot parse") !== -1) {
+        renderSystemError("อ่านข้อมูลจากเซิร์ฟเวอร์ไม่ได้", msg);
+      } else if (msg.toLowerCase().indexOf("network") !== -1 || msg.toLowerCase().indexOf("failed to fetch") !== -1) {
+        renderSystemError("ไม่มีการเชื่อมต่ออินเทอร์เน็ต", msg);
+      } else if (msg.toLowerCase().indexOf("liff") !== -1) {
+        renderSystemError(
+          "LIFF เริ่มต้นไม่สำเร็จ",
+          "ตรวจสอบ:\n1. LIFF_ID ถูกต้อง\n2. Endpoint URL ตรงกับ URL ของหน้านี้\n\n" + msg
+        );
+      } else {
+        renderSystemError("เกิดข้อผิดพลาดที่ไม่คาดคิด", msg);
+      }
+    });
 }
 
-init().catch(err => {
-  console.error(err);
-  hideLoader();
-  renderSystemError("LIFF Init Error: " + (err?.message || err));
-});
+init();
 </script>
 </body>
 </html>
